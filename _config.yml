@@ -1,0 +1,21 @@
+title: "Mi sitio Jekyll"
+description: "Sitio web creado con Jekyll para GitHub Pages"
+
+url: "https://cihernand.github.io"
+baseurl: ""
+
+lang: "es"
+timezone: "Europe/Madrid"
+
+markdown: kramdown
+permalink: pretty
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
