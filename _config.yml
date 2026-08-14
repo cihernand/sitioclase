@@ -2,7 +2,7 @@ title: "Mi sitio Jekyll"
 description: "Sitio web creado con Jekyll para GitHub Pages"
 
 url: "https://cihernand.github.io"
-baseurl: ""
+baseurl: "/sitioclase"
 
 lang: "es"
 timezone: "Europe/Madrid"
