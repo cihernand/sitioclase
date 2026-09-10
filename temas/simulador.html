@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio Biostatístico: Prueba Exacta de Fisher y Odds Ratio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts & KaTeX -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMath()"></script>
+    
+    <!-- Color Theory Custom Styles & Glows -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Seed Sprouts & Visual Glow Effects using Color Harmony */
+        .sprout-glow { filter: drop-shadow(0px 0px 8px rgba(16, 185, 129, 0.7)); }
+        .dormant-seed-glow { filter: drop-shadow(0px 0px 4px rgba(180, 83, 9, 0.4)); }
+        .dish-light-glow { box-shadow: inset 0 0 25px rgba(251, 191, 36, 0.15), 0 4px 20px rgba(245, 158, 11, 0.08); }
+        .dish-dark-glow { box-shadow: inset 0 0 30px rgba(99, 102, 241, 0.2), 0 4px 25px rgba(15, 23, 42, 0.5); }
+        
+        /* Glassmorphism panels */
+        .glass-panel { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(12px); }
+        
+        /* Smooth transitions for interactive state adjustments */
+        .transition-color-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col selection:bg-emerald-200 selection:text-emerald-900">
+
+    <!-- Header Navbar with Solar and Night Contrast -->
+    <header class="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white shadow-xl border-b border-indigo-900/50 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-gradient-to-br from-emerald-500/20 to-teal-500/10 text-emerald-400 rounded-xl border border-emerald-500/30 shadow-inner">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        Prueba Exacta de Fisher & Odds Ratio
+                        <span class="text-[11px] bg-emerald-500/20 text-emerald-300 font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/30">Nivel Universitario • Semestre V</span>
+                    </h1>
+                    <p class="text-xs text-slate-300">Experimento de Germinación en Semillas de Pepino (<em class="italic">Cucumis sativus</em>)</p>
+                </div>
+            </div>
+
+            <!-- Learning Cycle Indicators (Color Harmony: Emerald -> Cyan -> Indigo -> Purple) -->
+            <div class="flex items-center gap-1 sm:gap-1.5 text-xs font-semibold">
+                <span class="px-2.5 py-1 rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-600/50 flex items-center gap-1.5 shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 1. OBSERVAR
+                </span>
+                <span class="text-slate-600">&rarr;</span>
+                <span class="px-2.5 py-1 rounded-lg bg-amber-950/80 text-amber-300 border border-amber-600/50">2. MODIFICAR</span>
+                <span class="text-slate-600">&rarr;</span>
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-950/80 text-indigo-300 border border-indigo-600/50">3. COMPARAR</span>
+                <span class="text-slate-600">&rarr;</span>
+                <span class="px-2.5 py-1 rounded-lg bg-purple-950/80 text-purple-300 border border-purple-600/50">4. INTERPRETAR</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-6">
+
+        <!-- Presets Selection Bar with Semantic Color Accents -->
+        <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="flex items-center space-x-2 text-slate-700 font-semibold text-sm">
+                    <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    <span>Escenarios Preconfigurados de Investigación:</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="loadPreset('strong_light')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-300/80 transition-all shadow-sm flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span> ☀️ Luz Favorece ($OR > 1$)
+                    </button>
+                    <button onclick="loadPreset('null_effect')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300/80 transition-all shadow-sm flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-slate-400"></span> ⚖️ Sin Diferencia ($H_0$, $OR \approx 1$)
+                    </button>
+                    <button onclick="loadPreset('small_sample')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-orange-50 text-orange-800 hover:bg-orange-100 border border-orange-300/80 transition-all shadow-sm flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-orange-500"></span> ⚠️ Muestra Pequeña ($N=10$)
+                    </button>
+                    <button onclick="loadPreset('dark_favored')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-50 text-indigo-800 hover:bg-indigo-100 border border-indigo-300/80 transition-all shadow-sm flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 🌙 Oscuridad Favorece ($OR < 1$)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Dynamic Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Column 1: Interactive Contingency Table Controls (4 cols) -->
+            <section class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between space-y-5">
+                <div>
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-800">1</span>
+                                Tabla de Contingencia 2x2
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-0.5">Modifica los conteos de semillas por tratamiento</p>
+                        </div>
+                        <button onclick="resetValues()" title="Restablecer" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- 2x2 Matrix Controls Grid -->
+                    <div class="space-y-4">
+                        <!-- Treatment 1: Luz (Solar Warmth Palette) -->
+                        <div class="p-4 bg-gradient-to-br from-amber-50/80 via-yellow-50/40 to-orange-50/30 rounded-xl border border-amber-200/90 space-y-3 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                                    <span class="text-base">☀️</span> Tratamiento 1: LUZ
+                                </span>
+                                <span class="text-xs text-amber-800 font-semibold bg-amber-200/60 px-2 py-0.5 rounded-full">Total: <strong id="total-light">0</strong></span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <!-- Light Success -->
+                                <div class="bg-white p-2.5 rounded-xl border border-emerald-300/80 flex flex-col items-center shadow-sm">
+                                    <span class="text-[11px] font-bold text-emerald-700 mb-1 flex items-center gap-1">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Germina ($A$)
+                                    </span>
+                                    <div class="flex items-center space-x-1.5">
+                                        <button onclick="changeVal('a', -1)" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-sm flex items-center justify-center transition border border-emerald-200">-</button>
+                                        <input type="number" id="val-a" min="0" max="50" value="18" onchange="updateCalculations()" class="w-12 text-center font-mono font-bold text-slate-800 text-base border-0 focus:ring-2 focus:ring-emerald-400 p-0 rounded-md">
+                                        <button onclick="changeVal('a', 1)" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-sm flex items-center justify-center transition border border-emerald-200">+</button>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-medium mt-1">Celda A</span>
+                                </div>
+                                <!-- Light Failure -->
+                                <div class="bg-white p-2.5 rounded-xl border border-amber-800/30 flex flex-col items-center shadow-sm">
+                                    <span class="text-[11px] font-bold text-amber-900 mb-1 flex items-center gap-1">
+                                        <span class="w-2 h-2 rounded-full bg-amber-800 inline-block"></span> No Germina ($B$)
+                                    </span>
+                                    <div class="flex items-center space-x-1.5">
+                                        <button onclick="changeVal('b', -1)" class="w-7 h-7 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-sm flex items-center justify-center transition border border-amber-200">-</button>
+                                        <input type="number" id="val-b" min="0" max="50" value="2" onchange="updateCalculations()" class="w-12 text-center font-mono font-bold text-slate-800 text-base border-0 focus:ring-2 focus:ring-amber-400 p-0 rounded-md">
+                                        <button onclick="changeVal('b', 1)" class="w-7 h-7 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-sm flex items-center justify-center transition border border-amber-200">+</button>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-medium mt-1">Celda B</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Treatment 2: Oscuridad (Midnight Bioluminescent Palette) -->
+                        <div class="p-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white rounded-xl border border-indigo-900/80 space-y-3 shadow-md">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                                    <span class="text-base">🌙</span> Tratamiento 2: OSCURIDAD
+                                </span>
+                                <span class="text-xs text-indigo-200 font-semibold bg-indigo-900/80 px-2 py-0.5 rounded-full border border-indigo-700/50">Total: <strong id="total-dark">0</strong></span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <!-- Dark Success -->
+                                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-emerald-500/50 flex flex-col items-center shadow-inner">
+                                    <span class="text-[11px] font-bold text-emerald-400 mb-1 flex items-center gap-1">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block sprout-glow"></span> Germina ($C$)
+                                    </span>
+                                    <div class="flex items-center space-x-1.5">
+                                        <button onclick="changeVal('c', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-bold text-sm flex items-center justify-center transition border border-slate-700">-</button>
+                                        <input type="number" id="val-c" min="0" max="50" value="4" onchange="updateCalculations()" class="w-12 text-center font-mono font-bold text-white bg-slate-950 text-base border-0 focus:ring-2 focus:ring-emerald-400 p-0 rounded-md">
+                                        <button onclick="changeVal('c', 1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-bold text-sm flex items-center justify-center transition border border-slate-700">+</button>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-medium mt-1">Celda C</span>
+                                </div>
+                                <!-- Dark Failure -->
+                                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-amber-700/50 flex flex-col items-center shadow-inner">
+                                    <span class="text-[11px] font-bold text-amber-400 mb-1 flex items-center gap-1">
+                                        <span class="w-2 h-2 rounded-full bg-amber-700 inline-block"></span> No Germina ($D$)
+                                    </span>
+                                    <div class="flex items-center space-x-1.5">
+                                        <button onclick="changeVal('d', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-sm flex items-center justify-center transition border border-slate-700">-</button>
+                                        <input type="number" id="val-d" min="0" max="50" value="16" onchange="updateCalculations()" class="w-12 text-center font-mono font-bold text-white bg-slate-950 text-base border-0 focus:ring-2 focus:ring-amber-400 p-0 rounded-md">
+                                        <button onclick="changeVal('d', 1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-sm flex items-center justify-center transition border border-slate-700">+</button>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-medium mt-1">Celda D</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Total Badge -->
+                <div class="p-3 bg-slate-900 text-white rounded-xl border border-slate-800 flex items-center justify-between text-xs shadow-sm">
+                    <span class="text-slate-300 font-medium flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-teal-400"></span> Tamaño de Muestra Total ($N$):
+                    </span>
+                    <span class="font-mono font-bold text-teal-300 text-sm bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800" id="grand-total">0 semillas</span>
+                </div>
+            </section>
+
+            <!-- Column 2: Visual Simulation Trays (4 cols) -->
+            <section class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-800">2</span>
+                            Simulación en Placa Petri
+                        </h2>
+                        <span class="text-[11px] bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-semibold border border-slate-200">Visualización en Vivo</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Light Petri Dish Simulation -->
+                        <div class="bg-gradient-to-b from-amber-50 to-yellow-50/50 rounded-2xl p-3.5 border border-amber-300/80 dish-light-glow">
+                            <div class="flex items-center justify-between mb-2.5">
+                                <span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                                    ☀️ Placa Luz 
+                                    <span class="text-[11px] font-normal text-slate-600">(Éxitos: <strong id="dish-light-success" class="text-emerald-600">0</strong> | Fracasos: <strong id="dish-light-fail" class="text-amber-800">0</strong>)</span>
+                                </span>
+                                <span class="text-[10px] bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full font-bold font-mono" id="pct-light">0% éxito</span>
+                            </div>
+                            <div id="dish-light-container" class="bg-amber-100/40 rounded-xl p-3.5 min-h-[115px] flex flex-wrap gap-2 items-center justify-center border border-amber-200/60 shadow-inner">
+                                <!-- Seeds populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Dark Petri Dish Simulation -->
+                        <div class="bg-gradient-to-b from-slate-900 via-slate-950 to-indigo-950 text-white rounded-2xl p-3.5 border border-indigo-900/80 dish-dark-glow">
+                            <div class="flex items-center justify-between mb-2.5">
+                                <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                                    🌙 Placa Oscuridad
+                                    <span class="text-[11px] font-normal text-slate-400">(Éxitos: <strong id="dish-dark-success" class="text-emerald-400">0</strong> | Fracasos: <strong id="dish-dark-fail" class="text-amber-400">0</strong>)</span>
+                                </span>
+                                <span class="text-[10px] bg-indigo-900/90 text-indigo-200 px-2 py-0.5 rounded-full font-bold font-mono border border-indigo-700/50" id="pct-dark">0% éxito</span>
+                            </div>
+                            <div id="dish-dark-container" class="bg-slate-950 rounded-xl p-3.5 min-h-[115px] flex flex-wrap gap-2 items-center justify-center border border-slate-800/80 shadow-inner">
+                                <!-- Seeds populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color-Coded Legend -->
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-around text-xs font-medium text-slate-600">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 border border-emerald-300 inline-block sprout-glow"></span>
+                        <span class="text-emerald-900 font-semibold">Germinada (Brote Verde)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3.5 h-3.5 rounded-full bg-amber-800/80 border border-amber-950 inline-block"></span>
+                        <span class="text-amber-950 font-semibold">No Germinada (Dormancia)</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Column 3: Mathematical Analytics & Fisher Test Metrics (4 cols) -->
+            <section class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between space-y-4">
+                <div>
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-800">3</span>
+                            Estadísticos e Inferencia
+                        </h2>
+                        <span id="p-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            Calculando...
+                        </span>
+                    </div>
+
+                    <!-- Step 1: Odds calculation breakdown -->
+                    <div class="space-y-2 mb-4">
+                        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                            <span>1. Ventaja (Odds) por Tratamiento</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="p-2.5 bg-amber-50/80 border border-amber-200 rounded-xl shadow-2xs">
+                                <div class="text-amber-900 font-bold text-[11px]" id="odds-light-math">$$\text{Odds}_{\text{Luz}} = \frac{A}{B}$$</div>
+                                <div class="font-mono font-extrabold text-amber-950 text-base mt-1" id="odds-light-val">0.00</div>
+                                <div class="text-[10px] text-amber-800/90 font-mono" id="odds-light-formula">18 / 2</div>
+                            </div>
+                            <div class="p-2.5 bg-indigo-50/80 border border-indigo-200 rounded-xl shadow-2xs">
+                                <div class="text-indigo-900 font-bold text-[11px]" id="odds-dark-math">$$\text{Odds}_{\text{Osc}} = \frac{C}{D}$$</div>
+                                <div class="font-mono font-extrabold text-indigo-950 text-base mt-1" id="odds-dark-val">0.00</div>
+                                <div class="text-[10px] text-indigo-800/90 font-mono" id="odds-dark-formula">4 / 16</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Odds Ratio & Diverging Spectrum Gauge -->
+                    <div class="p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white rounded-xl space-y-3 shadow-md border border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-300">Razón de Ventajas (Odds Ratio)</span>
+                            <span class="text-[11px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-md" id="or-math-badge">
+                                $$OR = \frac{\text{Odds}_{\text{Luz}}}{\text{Odds}_{\text{Osc}}}$$
+                            </span>
+                        </div>
+
+                        <div class="flex items-baseline justify-between">
+                            <div class="text-3xl font-extrabold font-mono text-emerald-400 tracking-tight" id="or-value">
+                                36.00
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">IC 95% (Woolf)</div>
+                                <div class="text-xs font-mono font-bold text-slate-200" id="or-ci">[ 5.21 - 248.60 ]</div>
+                            </div>
+                        </div>
+
+                        <!-- Diverging Color Gauge Scale (Visual Spectrum mapping log-OR) -->
+                        <div class="space-y-1.5 pt-1">
+                            <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                                <span class="text-indigo-300 font-semibold">Favorece Osc. (&lt;1)</span>
+                                <span class="font-bold text-slate-300">Neutro (1.0)</span>
+                                <span class="text-emerald-300 font-semibold">Favorece Luz (&gt;1)</span>
+                            </div>
+                            <div class="w-full h-3 bg-slate-950 rounded-full overflow-hidden relative border border-slate-800 p-0.5">
+                                <!-- Center Neutral Marker -->
+                                <div class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-300 z-20 shadow-sm"></div>
+                                <!-- Dynamic Marker Bar with Tri-chromatic Spectrum -->
+                                <div id="or-gauge-bar" class="h-full bg-gradient-to-r from-indigo-500 via-slate-400 to-emerald-400 transition-all duration-300 rounded-full" style="width: 50%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Fisher's Exact Test p-value -->
+                    <div class="mt-3 p-3.5 bg-slate-50 border border-slate-200/90 rounded-xl space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-800">Prueba Exacta de Fisher ($p$-valor):</span>
+                            <span class="font-mono font-bold text-sm text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200" id="fisher-p-val">p = 0.0001</span>
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-tight" id="fisher-explanation">
+                            Probabilidad hipergeométrica exacta de observar una asociación tan o más extrema bajo $H_0$.
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <!-- Step 4: Pedagogical Interpretation Engine (OBSERVAR -> MODIFICAR -> COMPARAR -> INTERPRETAR) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+            <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+                <span class="flex h-7 w-7 items-center justify-center rounded-full bg-purple-100 text-sm font-bold text-purple-800">4</span>
+                <h2 class="text-base font-bold text-slate-900">Guía de Interpretación Biostatística Paso a Paso</h2>
+                <span class="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full font-semibold">Análisis Guiado</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <!-- Card 1: Interpretation of Odds (Solar & Night Color Accents) -->
+                <div class="p-4 bg-gradient-to-b from-amber-50/50 to-slate-50/50 rounded-xl border border-amber-200/70 space-y-2">
+                    <div class="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                        1. ¿Qué significan las Odds?
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed" id="interp-odds">
+                        Las Odds expresan el cociente entre la probabilidad de germinar vs. la probabilidad de no germinar.
+                    </p>
+                </div>
+
+                <!-- Card 2: Interpretation of Odds Ratio (Emerald Palette Accent) -->
+                <div class="p-4 bg-gradient-to-b from-emerald-50/50 to-slate-50/50 rounded-xl border border-emerald-200/70 space-y-2">
+                    <div class="flex items-center gap-2 text-xs font-bold text-emerald-900 uppercase tracking-wider">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        2. Magnitud del Efecto ($OR$)
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed" id="interp-or">
+                        Un $OR > 1$ indica mayor ventaja de germinación en Luz respecto a Oscuridad.
+                    </p>
+                </div>
+
+                <!-- Card 3: Interpretation of Fisher's Exact Test (Indigo Palette Accent) -->
+                <div class="p-4 bg-gradient-to-b from-indigo-50/50 to-slate-50/50 rounded-xl border border-indigo-200/70 space-y-2">
+                    <div class="flex items-center gap-2 text-xs font-bold text-indigo-900 uppercase tracking-wider">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                        3. Conclusión Infe. ($p$-valor)
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed" id="interp-fisher">
+                        Evaluando la hipótesis nula ($H_0$: el tipo de iluminación no afecta la germinación).
+                    </p>
+                </div>
+            </div>
+
+            <!-- Conceptual Clarification Banner for University Students -->
+            <div class="p-4 bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-slate-50 rounded-xl border border-blue-200 text-xs text-blue-950 space-y-1.5 shadow-xs">
+                <div class="font-bold flex items-center gap-2 text-blue-950 text-sm">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Nota Metodológica para Semestre V: ¿Por qué Prueba Exacta de Fisher y no $\chi^2$ de Pearson?
+                </div>
+                <p class="text-blue-900 leading-relaxed">
+                    Utilizamos la <strong>Prueba Exacta de Fisher</strong> porque calcula la probabilidad exacta en tablas 2x2 basada en la distribución hipergeométrica sin requerir supuestos asintóticos. Es el estándar de oro en bioestadística cuando los tamaños muestrales son pequeños ($N < 40$) o cuando alguna frecuencia esperada en las celdas es menor a 5 (Regla de Cochran).
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-400 text-xs border-t border-slate-800 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-1">
+            <p class="text-slate-300 font-medium">Módulo de Bioestadística Interactiva • Interpretación de Pruebas Exactas y Medidas de Asociación</p>
+            <p class="text-slate-500 text-[11px]">Diseñado para la enseñanza universitaria en Ciencias Agropecuarias, Biológicas y Médicas.</p>
+        </div>
+    </footer>
+
+    <script>
+        const logFactTable = [0, 0];
+        function logFact(n) {
+            if (n < 0) return 0;
+            if (logFactTable[n] !== undefined) return logFactTable[n];
+            let res = logFactTable[logFactTable.length - 1];
+            for (let i = logFactTable.length; i <= n; i++) {
+                res += Math.log(i);
+                logFactTable[i] = res;
+            }
+            return logFactTable[n];
+        }
+
+        function hypergeomProb(a, b, c, d) {
+            const r1 = a + b;
+            const r2 = c + d;
+            const c1 = a + c;
+            const c2 = b + d;
+            const n = a + b + c + d;
+
+            if (a < 0 || b < 0 || c < 0 || d < 0) return 0;
+
+            const logP = logFact(r1) + logFact(r2) + logFact(c1) + logFact(c2) 
+                       - (logFact(a) + logFact(b) + logFact(c) + logFact(d) + logFact(n));
+            return Math.exp(logP);
+        }
+
+        function calculateFisherExact(a, b, c, d) {
+            const r1 = a + b;
+            const r2 = c + d;
+            const c1 = a + c;
+            const c2 = b + d;
+            const n = a + b + c + d;
+
+            if (n === 0) return 1.0;
+
+            const minA = Math.max(0, c1 - r2);
+            const maxA = Math.min(r1, c1);
+            
+            const pObserved = hypergeomProb(a, b, c, d);
+            let pTotal = 0;
+
+            for (let x = minA; x <= maxA; x++) {
+                const y = r1 - x;
+                const z = c1 - x;
+                const w = r2 - z;
+                const pX = hypergeomProb(x, y, z, w);
+                
+                // Precision float margin
+                if (pX <= pObserved + 1e-11) {
+                    pTotal += pX;
+                }
+            }
+
+            return Math.min(1.0, pTotal);
+        }
+
+        function changeVal(cell, delta) {
+            const input = document.getElementById(`val-${cell}`);
+            let val = parseInt(input.value) || 0;
+            val = Math.max(0, Math.min(50, val + delta));
+            input.value = val;
+            updateCalculations();
+        }
+
+        function loadPreset(presetKey) {
+            if (presetKey === 'strong_light') {
+                document.getElementById('val-a').value = 18;
+                document.getElementById('val-b').value = 2;
+                document.getElementById('val-c').value = 4;
+                document.getElementById('val-d').value = 16;
+            } else if (presetKey === 'null_effect') {
+                document.getElementById('val-a').value = 10;
+                document.getElementById('val-b').value = 10;
+                document.getElementById('val-c').value = 10;
+                document.getElementById('val-d').value = 10;
+            } else if (presetKey === 'small_sample') {
+                document.getElementById('val-a').value = 4;
+                document.getElementById('val-b').value = 1;
+                document.getElementById('val-c').value = 1;
+                document.getElementById('val-d').value = 4;
+            } else if (presetKey === 'dark_favored') {
+                document.getElementById('val-a').value = 3;
+                document.getElementById('val-b').value = 17;
+                document.getElementById('val-c').value = 15;
+                document.getElementById('val-d').value = 5;
+            }
+            updateCalculations();
+        }
+
+        function resetValues() {
+            loadPreset('strong_light');
+        }
+
+        function renderPetriDish(containerId, successCount, failCount, isLightMode) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            const total = successCount + failCount;
+            if (total === 0) {
+                container.innerHTML = `<span class="text-xs text-slate-400 italic font-medium">Sin semillas en este tratamiento</span>`;
+                return;
+            }
+
+            // Cap maximum rendered icons for optimal dish presentation
+            const maxDisplay = 40;
+            const scale = total > maxDisplay ? maxDisplay / total : 1;
+
+            const dispSuccess = Math.round(successCount * scale);
+            const dispFail = Math.round(failCount * scale);
+
+            // Render Sprouts (Success - Chlorophyll Emerald Glow)
+            for (let i = 0; i < dispSuccess; i++) {
+                const seed = document.createElement('div');
+                seed.className = 'w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center transition-transform hover:scale-125 cursor-pointer shadow-xs';
+                seed.title = 'Semilla Germinada (Éxito)';
+                seed.innerHTML = `
+                    <svg class="w-5 h-5 text-emerald-400 sprout-glow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 20v-8m0 0c0-3.5 2.5-6 6-6 0 3.5-2.5 6-6 6zm0 0c0-3.5-2.5-6-6-6 0 3.5 2.5 6 6 6z" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                `;
+                container.appendChild(seed);
+            }
+
+            // Render Ungerminated (Failure/Dormancy - Earth Umber Clay)
+            for (let i = 0; i < dispFail; i++) {
+                const seed = document.createElement('div');
+                seed.className = 'w-7 h-7 rounded-full bg-amber-950/40 border border-amber-800/60 flex items-center justify-center transition-transform hover:scale-110 cursor-pointer shadow-xs';
+                seed.title = 'Semilla No Germinada (Dormancia)';
+                seed.innerHTML = `
+                    <div class="w-3.5 h-2 bg-amber-800 rounded-full border border-amber-950 rotate-45 opacity-90 dormant-seed-glow"></div>
+                `;
+                container.appendChild(seed);
+            }
+        }
+
+        function updateCalculations() {
+            // Read matrix cell values
+            const a = Math.max(0, parseInt(document.getElementById('val-a').value) || 0);
+            const b = Math.max(0, parseInt(document.getElementById('val-b').value) || 0);
+            const c = Math.max(0, parseInt(document.getElementById('val-c').value) || 0);
+            const d = Math.max(0, parseInt(document.getElementById('val-d').value) || 0);
+
+            // Group Totals
+            const totalLight = a + b;
+            const totalDark = c + d;
+            const grandTotal = totalLight + totalDark;
+
+            document.getElementById('total-light').textContent = totalLight;
+            document.getElementById('total-dark').textContent = totalDark;
+            document.getElementById('grand-total').textContent = `${grandTotal} semillas`;
+
+            // Update Dish Counts
+            document.getElementById('dish-light-success').textContent = a;
+            document.getElementById('dish-light-fail').textContent = b;
+            document.getElementById('dish-dark-success').textContent = c;
+            document.getElementById('dish-dark-fail').textContent = d;
+
+            const pctLight = totalLight > 0 ? ((a / totalLight) * 100).toFixed(1) : '0.0';
+            const pctDark = totalDark > 0 ? ((c / totalDark) * 100).toFixed(1) : '0.0';
+
+            document.getElementById('pct-light').textContent = `${pctLight}% éxito`;
+            document.getElementById('pct-dark').textContent = `${pctDark}% éxito`;
+
+            // Render Visual Seed Dishes
+            renderPetriDish('dish-light-container', a, b, true);
+            renderPetriDish('dish-dark-container', c, d, false);
+
+            // Compute Odds with Haldane-Anscombe zero-cell correction if needed
+            const adjA = (a === 0 || b === 0 || c === 0 || d === 0) ? a + 0.5 : a;
+            const adjB = (a === 0 || b === 0 || c === 0 || d === 0) ? b + 0.5 : b;
+            const adjC = (a === 0 || b === 0 || c === 0 || d === 0) ? c + 0.5 : c;
+            const adjD = (a === 0 || b === 0 || c === 0 || d === 0) ? d + 0.5 : d;
+
+            const oddsLight = adjB > 0 ? (adjA / adjB) : 0;
+            const oddsDark = adjD > 0 ? (adjC / adjD) : 0;
+
+            document.getElementById('odds-light-val').textContent = oddsLight.toFixed(2);
+            document.getElementById('odds-light-formula').textContent = `${a} éxitos / ${b} fracasos`;
+
+            document.getElementById('odds-dark-val').textContent = oddsDark.toFixed(2);
+            document.getElementById('odds-dark-formula').textContent = `${c} éxitos / ${d} fracasos`;
+
+            // Compute Odds Ratio (OR)
+            const OR = oddsDark > 0 ? (oddsLight / oddsDark) : 0;
+            document.getElementById('or-value').textContent = OR.toFixed(2);
+
+            // Compute Woolf's 95% CI for OR
+            const seLogOR = Math.sqrt((1 / adjA) + (1 / adjB) + (1 / adjC) + (1 / adjD));
+            const logOR = Math.log(OR || 0.0001);
+            const ciLower = Math.exp(logOR - 1.96 * seLogOR);
+            const ciUpper = Math.exp(logOR + 1.96 * seLogOR);
+
+            document.getElementById('or-ci').textContent = `[ ${ciLower.toFixed(2)} - ${ciUpper.toFixed(2)} ]`;
+
+            // Update OR Diverging Spectrum Gauge Position
+            // Scale log(OR) from -3.0 to +3.0 to gauge 0% - 100%
+            const clampedLog = Math.max(-3, Math.min(3, logOR));
+            const gaugePct = ((clampedLog + 3) / 6) * 100;
+            document.getElementById('or-gauge-bar').style.width = `${gaugePct}%`;
+
+            // Compute Fisher Exact Test p-value
+            const pValue = calculateFisherExact(a, b, c, d);
+            const pFormatted = pValue < 0.0001 ? "p < 0.0001" : `p = ${pValue.toFixed(4)}`;
+            document.getElementById('fisher-p-val').textContent = pFormatted;
+
+            // Significance Badge (Color Theory: Emerald for Significant, Amber for Non-Significant)
+            const pBadge = document.getElementById('p-badge');
+            if (pValue < 0.05) {
+                pBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs";
+                pBadge.textContent = "Significativo (p < 0.05)";
+            } else {
+                pBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 shadow-2xs";
+                pBadge.textContent = "No Significativo (p ≥ 0.05)";
+            }
+
+            // Update Step 4 Pedagogical Text
+            updateInterpretationText(a, b, c, d, oddsLight, oddsDark, OR, ciLower, ciUpper, pValue);
+        }
+
+        function updateInterpretationText(a, b, c, d, oddsL, oddsD, OR, ciL, ciU, pVal) {
+            // Card 1: Odds
+            document.getElementById('interp-odds').innerHTML = `
+                En <strong>Luz</strong>, la ventaja de germinar es de <strong>${oddsL.toFixed(2)}</strong> (${a} germinadas por cada ${b} no germinadas).<br>
+                En <strong>Oscuridad</strong>, la ventaja es de <strong>${oddsD.toFixed(2)}</strong> (${c} germinadas por cada ${d} no germinadas).
+            `;
+
+            // Card 2: OR
+            let orMeaning = "";
+            if (Math.abs(OR - 1.0) < 0.05) {
+                orMeaning = `Las probabilidades de germinación son idénticas en ambos tratamientos (<strong>OR ≈ 1.00</strong>). La luz no altera la ventaja de germinación.`;
+            } else if (OR > 1.0) {
+                orMeaning = `La ventaja de germinar en semillas expuestas a <strong>Luz</strong> es <strong>${OR.toFixed(2)} veces mayor</strong> respecto a Oscuridad.`;
+            } else {
+                orMeaning = `La ventaja en <strong>Luz</strong> es menor (<strong>OR = ${OR.toFixed(2)}</strong>), indicando que la Oscuridad favorece la germinación.`;
+            }
+
+            const includesOne = ciL <= 1.0 && ciU >= 1.0;
+            const ciNote = includesOne 
+                ? `<span class="text-amber-800 font-semibold">El IC 95% [${ciL.toFixed(2)}, ${ciU.toFixed(2)}] incluye el 1.0 (valor nulo).</span>`
+                : `<span class="text-emerald-800 font-semibold">El IC 95% [${ciL.toFixed(2)}, ${ciU.toFixed(2)}] no incluye el 1.0, lo que confirma un efecto real.</span>`;
+
+            document.getElementById('interp-or').innerHTML = `${orMeaning}<br><span class="block mt-1 text-[11px]">${ciNote}</span>`;
+
+            // Card 3: Fisher Test p-value
+            if (pVal < 0.05) {
+                document.getElementById('interp-fisher').innerHTML = `
+                    Con un <strong>p-valor = ${pVal < 0.0001 ? '< 0.0001' : pVal.toFixed(4)}</strong> (&lt; 0.05), <strong>rechazamos $H_0$</strong>. Existe evidencia estadística significativa de que la luz favorece la germinación.
+                `;
+            } else {
+                document.getElementById('interp-fisher').innerHTML = `
+                    Con un <strong>p-valor = ${pVal.toFixed(4)}</strong> ($\ge 0.05$), <strong>no rechazamos $H_0$</strong>. La diferencia observada puede deberse al azar muestral.
+                `;
+            }
+
+            // Trigger dynamic math rendering
+            renderMath();
+        }
+
+        function renderMath() {
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        // Initialize Application
+        window.onload = function() {
+            updateCalculations();
+            renderMath();
+        };
+    </script>
+</body>
+</html>
