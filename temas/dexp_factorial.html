@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio Virtual: Diseño Factorial 2x2 en Cultivos In Vitro</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        botanical: {
+                            50: '#f2faf5',
+                            100: '#e1f4e8',
+                            200: '#c3e8d2',
+                            300: '#95d5b2',
+                            400: '#74c69d',
+                            500: '#52b788',
+                            600: '#40916c',
+                            700: '#2d6a4f',
+                            800: '#1b4332',
+                            900: '#081c15',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #081c15;
+            color: #f2faf5;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .glass-card {
+            background: rgba(27, 67, 50, 0.35);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(82, 183, 136, 0.15);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .flask-container {
+            background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(82, 183, 136, 0.08) 100%);
+        }
+
+        .stem-path {
+            transition: d 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .leaf-group {
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-10">
+
+    <!-- ENCABEZADO PRINCIPAL -->
+    <header class="border-b border-botanical-800/60 bg-botanical-900/90 sticky top-0 z-50 backdrop-blur-md px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-botanical-700/40 text-botanical-400 rounded-xl border border-botanical-500/30">
+                    <i class="fa-solid fa-seedling text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-slate-100 tracking-tight leading-none">Laboratorio Virtual: Diseño Factorial 2x2</h1>
+                    <p class="text-xs text-botanical-300/80 mt-1">Cultivo in vitro de plántulas de frijol | <span class="text-botanical-400 font-medium">Ingeniería en Biotecnología (5° Semestre)</span></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs bg-botanical-800/50 border border-botanical-700/50 px-3.5 py-1.5 rounded-xl text-botanical-200">
+                <i class="fa-solid fa-flask text-botanical-400"></i>
+                <span>Estadística Aplicada & Fisiología Vegetal</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 mt-6 flex-grow w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- PANEL IZQUIERDO: CONTROLES DE INTERACCIÓN Y FLUJO DIDÁCTICO -->
+        <section class="lg:col-span-4 flex flex-col gap-5">
+            
+            <!-- CICLO DIDÁCTICO -->
+            <div class="glass-card p-4 rounded-2xl border-l-4 border-l-botanical-400">
+                <span class="text-xs font-bold uppercase tracking-wider text-botanical-300 flex items-center gap-1.5 mb-2">
+                    <i class="fa-solid fa-arrows-spin text-botanical-400"></i> Flujo de Aprendizaje
+                </span>
+                <div class="grid grid-cols-4 gap-1 text-center text-[10px] font-semibold text-slate-300">
+                    <div class="bg-botanical-900/80 p-2 rounded-lg border border-botanical-800/80">1. OBSERVA</div>
+                    <div class="bg-botanical-500/20 p-2 rounded-lg border border-botanical-500/40 text-botanical-300">2. MODIFICA</div>
+                    <div class="bg-botanical-900/80 p-2 rounded-lg border border-botanical-800/80">3. COMPARA</div>
+                    <div class="bg-botanical-900/80 p-2 rounded-lg border border-botanical-800/80">4. INTERPRETA</div>
+                </div>
+            </div>
+
+            <!-- CONTROLE DE TIPO DE INTERACCIÓN -->
+            <div class="glass-card p-5 rounded-2xl flex flex-col gap-4">
+                <div>
+                    <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-botanical-400"></i> Tipo de Interacción
+                    </h2>
+                    <p class="text-[11px] text-botanical-200/70 mt-1">Selecciona la respuesta biológica al combinar Luz y Fitorregulador:</p>
+                </div>
+
+                <div class="space-y-2.5">
+                    <!-- Botón Independencia -->
+                    <button onclick="setInteraction('independence')" id="btn-independence" 
+                            class="btn-interaction w-full text-left p-3.5 rounded-xl border border-botanical-800 bg-botanical-900/60 text-slate-300 hover:border-botanical-500/50 transition-all flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 rounded-lg bg-botanical-800/80 text-botanical-300 group-hover:text-botanical-200 group-hover:bg-botanical-700/60 transition-colors">
+                                <i class="fa-solid fa-equals text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-xs text-slate-100">INDEPENDENCIA</div>
+                                <div class="text-[11px] text-botanical-300/70">Efecto aditivo independiente (líneas paralelas)</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-botanical-600 group-hover:text-botanical-400"></i>
+                    </button>
+
+                    <!-- Botón Sinergia -->
+                    <button onclick="setInteraction('synergy')" id="btn-synergy" 
+                            class="btn-interaction w-full text-left p-3.5 rounded-xl border border-botanical-800 bg-botanical-900/60 text-slate-300 hover:border-botanical-500/50 transition-all flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 rounded-lg bg-botanical-800/80 text-botanical-300 group-hover:text-botanical-200 group-hover:bg-botanical-700/60 transition-colors">
+                                <i class="fa-solid fa-bolt text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-xs text-slate-100">SINERGIA</div>
+                                <div class="text-[11px] text-botanical-300/70">Respuesta potenciada (líneas se abren)</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-botanical-600 group-hover:text-botanical-400"></i>
+                    </button>
+
+                    <!-- Botón Antagonismo -->
+                    <button onclick="setInteraction('antagonism')" id="btn-antagonism" 
+                            class="btn-interaction w-full text-left p-3.5 rounded-xl border border-botanical-800 bg-botanical-900/60 text-slate-300 hover:border-botanical-500/50 transition-all flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 rounded-lg bg-botanical-800/80 text-botanical-300 group-hover:text-botanical-200 group-hover:bg-botanical-700/60 transition-colors">
+                                <i class="fa-solid fa-hand-halo text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-xs text-slate-100">ANTAGONISMO</div>
+                                <div class="text-[11px] text-botanical-300/70">Inhibición o interferencia (líneas se cruzan)</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-botanical-600 group-hover:text-botanical-400"></i>
+                    </button>
+                </div>
+
+                <!-- Botón de Simulación de Muestreo -->
+                <button onclick="runExperiment()" 
+                        class="w-full mt-1 py-3 bg-botanical-800/80 hover:bg-botanical-700/80 text-botanical-100 font-medium rounded-xl border border-botanical-600/50 transition-all flex items-center justify-center gap-2 text-xs shadow-md">
+                    <i class="fa-solid fa-rotate-right text-botanical-400"></i> Re-simular Muestreo (5 Réplicas Biol.)
+                </button>
+            </div>
+        </section>
+
+        <!-- PANEL DERECHO: VISUALIZACIONES, TABLA ANOVA Y GRÁFICO DE INTERACCIÓN -->
+        <section class="lg:col-span-8 flex flex-col gap-6">
+
+            <!-- 1. ESCENARIO VISUAL DE FRASCOS IN VITRO -->
+            <div class="glass-card p-5 rounded-2xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                    <div>
+                        <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-vial-circle-check text-botanical-400"></i> Frascos de Cultivo in vitro (Promedios Obtenidos)
+                        </h2>
+                        <p class="text-xs text-botanical-200/70">Visualización biológica del crecimiento medio del tallo en frascos MS.</p>
+                    </div>
+                    <span class="text-[11px] font-mono bg-botanical-900/90 text-botanical-300 px-3 py-1 rounded-lg border border-botanical-700/50 font-semibold">
+                        Tamaño de Muestra: 5 réplicas por tratamiento (Total 20)
+                    </span>
+                </div>
+
+                <!-- GRID DE LOS 4 FRASCOS -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    
+                    <!-- TRATAMIENTO 1: T1 (- -) Control / Oscuridad -->
+                    <div class="flask-container border border-botanical-800/80 rounded-xl p-3 flex flex-col items-center relative">
+                        <span class="text-[10px] font-bold text-botanical-400 uppercase tracking-wider">Tratamiento 1</span>
+                        <div class="text-xs font-bold text-slate-200 mb-1">Control</div>
+                        <div class="flex flex-wrap justify-center gap-1 mb-2">
+                            <span class="text-[9px] bg-red-950/60 text-red-300 border border-red-800/40 px-1.5 py-0.5 rounded">Sin Fitorreg.</span>
+                            <span class="text-[9px] bg-slate-900 text-slate-400 border border-slate-700 px-1.5 py-0.5 rounded">Oscuridad</span>
+                        </div>
+
+                        <!-- SVG FRASCO 1 (Etiolación ligera: tallo delgado pálido) -->
+                        <div class="w-full h-36 flex items-end justify-center relative">
+                            <svg viewBox="0 0 100 120" class="w-full h-full overflow-visible">
+                                <rect x="25" y="90" width="50" height="25" rx="3" fill="#2d6a4f" opacity="0.3"/>
+                                <path d="M 35 15 L 65 15 L 65 25 L 75 35 L 75 110 Q 75 115 70 115 L 30 115 Q 25 115 25 110 L 25 35 L 35 25 Z" 
+                                      fill="none" stroke="#74c69d" stroke-width="2" opacity="0.5"/>
+                                <rect x="33" y="10" width="34" height="6" rx="2" fill="#52b788" opacity="0.6"/>
+                                <g id="plant-t1">
+                                    <path class="stem-path" d="M 50 95 Q 48 80 50 75" fill="none" stroke="#fef08a" stroke-width="2.5" stroke-linecap="round"/>
+                                    <g class="leaf-group" transform="translate(50, 75)">
+                                        <ellipse cx="-4" cy="-2" rx="3" ry="2" fill="#fef08a" transform="rotate(-20)"/>
+                                        <ellipse cx="4" cy="-2" rx="3" ry="2" fill="#fef08a" transform="rotate(20)"/>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <div class="mt-2 text-center w-full border-t border-botanical-800/80 pt-2">
+                            <span class="text-[10px] text-botanical-300/70 block">Promedio Tallo:</span>
+                            <div class="text-xs font-mono font-bold text-slate-100"><span id="mean-t1">3.0</span> cm</div>
+                        </div>
+                    </div>
+
+                    <!-- TRATAMIENTO 2: T2 (- +) Luz / Sin Fitorreg -->
+                    <div class="flask-container border border-botanical-800/80 rounded-xl p-3 flex flex-col items-center relative">
+                        <span class="text-[10px] font-bold text-botanical-400 uppercase tracking-wider">Tratamiento 2</span>
+                        <div class="text-xs font-bold text-amber-300 mb-1">Luz Solamente</div>
+                        <div class="flex flex-wrap justify-center gap-1 mb-2">
+                            <span class="text-[9px] bg-red-950/60 text-red-300 border border-red-800/40 px-1.5 py-0.5 rounded">Sin Fitorreg.</span>
+                            <span class="text-[9px] bg-amber-950/80 text-amber-300 border border-amber-700/50 px-1.5 py-0.5 rounded">Luz</span>
+                        </div>
+
+                        <!-- SVG FRASCO 2 (Fotomorfogénesis: verde, compacto) -->
+                        <div class="w-full h-36 flex items-end justify-center relative">
+                            <div class="absolute top-0 inset-x-0 h-10 bg-amber-400/10 blur-sm rounded-full"></div>
+                            <svg viewBox="0 0 100 120" class="w-full h-full overflow-visible">
+                                <rect x="25" y="90" width="50" height="25" rx="3" fill="#2d6a4f" opacity="0.3"/>
+                                <path d="M 35 15 L 65 15 L 65 25 L 75 35 L 75 110 Q 75 115 70 115 L 30 115 Q 25 115 25 110 L 25 35 L 35 25 Z" 
+                                      fill="none" stroke="#eab308" stroke-width="2" opacity="0.6"/>
+                                <rect x="33" y="10" width="34" height="6" rx="2" fill="#fef08a" opacity="0.7"/>
+                                <g id="plant-t2">
+                                    <path class="stem-path" d="M 50 95 Q 52 82 50 68" fill="none" stroke="#52b788" stroke-width="3.5" stroke-linecap="round"/>
+                                    <g class="leaf-group" transform="translate(50, 68)">
+                                        <ellipse cx="-6" cy="-4" rx="5" ry="3.5" fill="#40916c" transform="rotate(-30)"/>
+                                        <ellipse cx="6" cy="-4" rx="5" ry="3.5" fill="#40916c" transform="rotate(30)"/>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <div class="mt-2 text-center w-full border-t border-botanical-800/80 pt-2">
+                            <span class="text-[10px] text-botanical-300/70 block">Promedio Tallo:</span>
+                            <div class="text-xs font-mono font-bold text-slate-100"><span id="mean-t2">5.0</span> cm</div>
+                        </div>
+                    </div>
+
+                    <!-- TRATAMIENTO 3: T3 (+ -) Fitorreg / Oscuridad -->
+                    <div class="flask-container border border-botanical-800/80 rounded-xl p-3 flex flex-col items-center relative">
+                        <span class="text-[10px] font-bold text-botanical-400 uppercase tracking-wider">Tratamiento 3</span>
+                        <div class="text-xs font-bold text-botanical-300 mb-1">Fitorreg. en Oscuridad</div>
+                        <div class="flex flex-wrap justify-center gap-1 mb-2">
+                            <span class="text-[9px] bg-botanical-950 text-botanical-300 border border-botanical-700/50 px-1.5 py-0.5 rounded">Con Fitorreg.</span>
+                            <span class="text-[9px] bg-slate-900 text-slate-400 border border-slate-700 px-1.5 py-0.5 rounded">Oscuridad</span>
+                        </div>
+
+                        <!-- SVG FRASCO 3 (Alta etiolación hormonal: tallo largo) -->
+                        <div class="w-full h-36 flex items-end justify-center relative">
+                            <svg viewBox="0 0 100 120" class="w-full h-full overflow-visible">
+                                <rect x="25" y="90" width="50" height="25" rx="3" fill="#2d6a4f" opacity="0.3"/>
+                                <path d="M 35 15 L 65 15 L 65 25 L 75 35 L 75 110 Q 75 115 70 115 L 30 115 Q 25 115 25 110 L 25 35 L 35 25 Z" 
+                                      fill="none" stroke="#74c69d" stroke-width="2" opacity="0.5"/>
+                                <rect x="33" y="10" width="34" height="6" rx="2" fill="#52b788" opacity="0.6"/>
+                                <g id="plant-t3">
+                                    <path class="stem-path" d="M 50 95 Q 48 65 50 45" fill="none" stroke="#fef08a" stroke-width="3" stroke-linecap="round"/>
+                                    <g class="leaf-group" transform="translate(50, 45)">
+                                        <ellipse cx="-5" cy="-3" rx="4" ry="2.5" fill="#fef08a" transform="rotate(-25)"/>
+                                        <ellipse cx="5" cy="-3" rx="4" ry="2.5" fill="#fef08a" transform="rotate(25)"/>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <div class="mt-2 text-center w-full border-t border-botanical-800/80 pt-2">
+                            <span class="text-[10px] text-botanical-300/70 block">Promedio Tallo:</span>
+                            <div class="text-xs font-mono font-bold text-slate-100"><span id="mean-t3">7.0</span> cm</div>
+                        </div>
+                    </div>
+
+                    <!-- TRATAMIENTO 4: T4 (+ +) Ambos Presentes -->
+                    <div class="flask-container border border-botanical-500/40 bg-botanical-950/30 rounded-xl p-3 flex flex-col items-center relative">
+                        <span class="text-[10px] font-bold text-botanical-400 uppercase tracking-wider">Tratamiento 4</span>
+                        <div class="text-xs font-bold text-botanical-300 mb-1">Fitorreg. + Luz</div>
+                        <div class="flex flex-wrap justify-center gap-1 mb-2">
+                            <span class="text-[9px] bg-botanical-950 text-botanical-300 border border-botanical-700/50 px-1.5 py-0.5 rounded">Con Fitorreg.</span>
+                            <span class="text-[9px] bg-amber-950/80 text-amber-300 border border-amber-700/50 px-1.5 py-0.5 rounded">Luz</span>
+                        </div>
+
+                        <!-- SVG FRASCO 4 (Variable según la interacción) -->
+                        <div class="w-full h-36 flex items-end justify-center relative">
+                            <div class="absolute top-0 inset-x-0 h-12 bg-amber-400/15 blur-sm rounded-full"></div>
+                            <svg viewBox="0 0 100 120" class="w-full h-full overflow-visible">
+                                <rect x="25" y="90" width="50" height="25" rx="3" fill="#2d6a4f" opacity="0.3"/>
+                                <path d="M 35 15 L 65 15 L 65 25 L 75 35 L 75 110 Q 75 115 70 115 L 30 115 Q 25 115 25 110 L 25 35 L 35 25 Z" 
+                                      fill="none" stroke="#52b788" stroke-width="2" opacity="0.8"/>
+                                <rect x="33" y="10" width="34" height="6" rx="2" fill="#74c69d" opacity="0.8"/>
+                                <g id="plant-t4">
+                                    <path class="stem-path" d="M 50 95 Q 52 50 50 30" fill="none" stroke="#52b788" stroke-width="4" stroke-linecap="round"/>
+                                    <g class="leaf-group" transform="translate(50, 30)">
+                                        <ellipse cx="-7" cy="-5" rx="6" ry="3.5" fill="#2d6a4f" transform="rotate(-30)"/>
+                                        <ellipse cx="7" cy="-5" rx="6" ry="3.5" fill="#2d6a4f" transform="rotate(30)"/>
+                                        <ellipse cx="0" cy="-8" rx="4" ry="6" fill="#1b4332"/>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <div class="mt-2 text-center w-full border-t border-botanical-800/80 pt-2">
+                            <span class="text-[10px] text-botanical-300/70 block">Promedio Tallo:</span>
+                            <div class="text-xs font-mono font-bold text-botanical-300"><span id="mean-t4">9.0</span> cm</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 2. TABLA DE DATOS RECOLECTADOS (5 Réplicas Biológicas) -->
+            <div class="glass-card p-5 rounded-2xl">
+                <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-list-ol text-botanical-400"></i> Tabla de Mediciones en Réplicas Biológicas (5 observaciones por grupo)
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-botanical-800/80 text-botanical-300/80 font-semibold uppercase text-[10px]">
+                                <th class="py-2 px-3">Tratamiento Experimental</th>
+                                <th class="py-2 px-2 text-center">R1 (cm)</th>
+                                <th class="py-2 px-2 text-center">R2 (cm)</th>
+                                <th class="py-2 px-2 text-center">R3 (cm)</th>
+                                <th class="py-2 px-2 text-center">R4 (cm)</th>
+                                <th class="py-2 px-2 text-center">R5 (cm)</th>
+                                <th class="py-2 px-3 text-right bg-botanical-900/60 font-bold text-botanical-300">Promedio (cm)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="replicates-table-body" class="font-mono divide-y divide-botanical-800/40 text-slate-300">
+                            <!-- Filas dinámicas generadas por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. GRÁFICA DE INTERACCIÓN DE EFECTOS -->
+            <div class="glass-card p-5 rounded-2xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
+                    <div>
+                        <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-botanical-400"></i> Gráfica de Interacción de Efectos
+                        </h2>
+                        <p class="text-xs text-botanical-200/70">Compara las pendientes de las líneas para evaluar la presencia o ausencia de interacción.</p>
+                    </div>
+                </div>
+
+                <div class="w-full h-64 relative">
+                    <canvas id="interactionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 4. TABLA ANOVA RESULTADOS (Simplificada, sin expresiones LaTeX) -->
+            <div class="glass-card p-5 rounded-2xl">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-table-cells text-botanical-400"></i> Tabla de Análisis de Varianza (ANOVA)
+                    </h2>
+                    <div id="anova-status-tag" class="text-xs px-2.5 py-1 rounded-lg font-semibold"></div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-botanical-800/80 text-botanical-300/80 font-semibold uppercase text-[10px]">
+                                <th class="py-2 px-3">Fuente de Variación</th>
+                                <th class="py-2 px-3 text-right">Suma de Cuadrados</th>
+                                <th class="py-2 px-3 text-center">Grados de Libertad</th>
+                                <th class="py-2 px-3 text-right">Cuadrado Medio</th>
+                                <th class="py-2 px-3 text-right">Valor F</th>
+                                <th class="py-2 px-3 text-right">Valor p</th>
+                                <th class="py-2 px-3 text-center">Resultado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="anova-body" class="font-mono divide-y divide-botanical-800/40 text-slate-300">
+                            <!-- Filas dinámicas -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. INTERPRETACIÓN INTUITIVA (Sin tecnicismos pesados) -->
+            <div class="glass-card p-5 rounded-2xl border-t-2 border-t-botanical-400">
+                <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-botanical-400"></i> Interpretación Biotecnológica Directa
+                </h2>
+                <div id="interpretation-text" class="text-xs text-slate-300 leading-relaxed space-y-2">
+                    <!-- Interpretación dinámica -->
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="max-w-7xl mx-auto px-4 lg:px-8 mt-8 text-center text-xs text-botanical-400/60">
+        Experiencia educativa para <span class="text-botanical-300">Ingeniería en Biotecnología</span> — Cultivos In Vitro Vegetales
+    </footer>
+
+    <script>
+        const state = {
+            interactionType: 'independence',
+            baseValue: 3.0,      // T1 (Control): Oscuridad, Sin Fitorreg = 3.0 cm
+            effectA: 4.0,        // Fitorregulador en oscuridad = +4.0 cm
+            effectB: 2.0,        // Luz sin fitorregulador = +2.0 cm
+            noiseStdDev: 0.3,    // Desviación estándar del ruido biológico
+            n: 5,                // RÉPLICAS FIJAS (n = 5 por tratamiento)
+            chartInstance: null,
+            currentData: null,
+            means: {}
+        };
+
+        // Generador de ruido aleatorio normal (Box-Muller)
+        function randomNormal(mean, stdDev) {
+            let u1 = Math.random();
+            let u2 = Math.random();
+            while(u1 === 0) u1 = Math.random();
+            let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+            return z0 * stdDev + mean;
+        }
+
+        window.onload = function() {
+            initChart();
+            setInteraction('independence');
+        };
+
+        function setInteraction(type) {
+            state.interactionType = type;
+
+            document.querySelectorAll('.btn-interaction').forEach(btn => {
+                btn.classList.remove('bg-botanical-800/80', 'border-botanical-500/60', 'ring-1', 'ring-botanical-400/40');
+                btn.classList.add('bg-botanical-900/60', 'border-botanical-800');
+            });
+
+            const activeBtn = document.getElementById(`btn-${type}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-botanical-900/60', 'border-botanical-800');
+                activeBtn.classList.add('bg-botanical-800/80', 'border-botanical-500/60', 'ring-1', 'ring-botanical-400/40');
+            }
+
+            runExperiment();
+        }
+
+        function runExperiment() {
+            let interactionEffect = 0;
+            if (state.interactionType === 'synergy') interactionEffect = +4.0;    // Potenciación
+            if (state.interactionType === 'antagonism') interactionEffect = -5.0; // Inhibición/Cancelación
+
+            const mu1 = state.baseValue;                                                    // T1 (3.0 cm)
+            const mu2 = state.baseValue + state.effectB;                                    // T2 (5.0 cm)
+            const mu3 = state.baseValue + state.effectA;                                    // T3 (7.0 cm)
+            const mu4 = Math.max(0.5, state.baseValue + state.effectA + state.effectB + interactionEffect); // T4 (9.0 / 13.0 / 4.0 cm)
+
+            // Generación de 5 réplicas biológicas por grupo
+            const reps = { t1: [], t2: [], t3: [], t4: [] };
+            for (let i = 0; i < state.n; i++) {
+                reps.t1.push(Math.max(0.2, randomNormal(mu1, state.noiseStdDev)));
+                reps.t2.push(Math.max(0.2, randomNormal(mu2, state.noiseStdDev)));
+                reps.t3.push(Math.max(0.2, randomNormal(mu3, state.noiseStdDev)));
+                reps.t4.push(Math.max(0.2, randomNormal(mu4, state.noiseStdDev)));
+            }
+
+            state.currentData = reps;
+
+            const mean1 = reps.t1.reduce((a, b) => a + b, 0) / state.n;
+            const mean2 = reps.t2.reduce((a, b) => a + b, 0) / state.n;
+            const mean3 = reps.t3.reduce((a, b) => a + b, 0) / state.n;
+            const mean4 = reps.t4.reduce((a, b) => a + b, 0) / state.n;
+
+            state.means = { mean1, mean2, mean3, mean4 };
+
+            // Actualizar frascos SVG
+            updateFlask('t1', mean1);
+            updateFlask('t2', mean2);
+            updateFlask('t3', mean3);
+            updateFlask('t4', mean4);
+
+            renderReplicatesTable();
+            updateChart();
+            calculateANOVA();
+        }
+
+        function updateFlask(id, meanVal) {
+            document.getElementById(`mean-${id}`).innerText = meanVal.toFixed(1);
+
+            // Mapeo suave de la altura en píxeles SVG
+            const strokeY = Math.max(20, 95 - (meanVal * 5.5));
+            const plantGroup = document.getElementById(`plant-${id}`);
+            const stemPath = plantGroup.querySelector('.stem-path');
+            const leafGroup = plantGroup.querySelector('.leaf-group');
+
+            stemPath.setAttribute('d', `M 50 95 Q 51 ${(95 + strokeY) / 2} 50 ${strokeY}`);
+            leafGroup.setAttribute('transform', `translate(50, ${strokeY})`);
+        }
+
+        function renderReplicatesTable() {
+            const data = state.currentData;
+            const m = state.means;
+
+            const rows = [
+                { name: 'T1: Sin Fitorreg. / Oscuridad', reps: data.t1, mean: m.mean1 },
+                { name: 'T2: Sin Fitorreg. / Luz', reps: data.t2, mean: m.mean2 },
+                { name: 'T3: Con Fitorreg. / Oscuridad', reps: data.t3, mean: m.mean3 },
+                { name: 'T4: Con Fitorreg. / Luz', reps: data.t4, mean: m.mean4 }
+            ];
+
+            const bodyHtml = rows.map(r => `
+                <tr class="hover:bg-botanical-800/30">
+                    <td class="py-2 px-3 font-sans font-medium text-slate-200">${r.name}</td>
+                    ${r.reps.map(v => `<td class="py-2 px-2 text-center text-slate-300">${v.toFixed(2)}</td>`).join('')}
+                    <td class="py-2 px-3 text-right bg-botanical-900/80 font-bold text-botanical-300">${r.mean.toFixed(2)}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('replicates-table-body').innerHTML = bodyHtml;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('interactionChart').getContext('2d');
+            state.chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Oscuridad', 'Luz'],
+                    datasets: [
+                        {
+                            label: 'Sin Fitorregulador',
+                            data: [3, 5],
+                            borderColor: '#eab308',
+                            backgroundColor: '#eab308',
+                            borderWidth: 3,
+                            pointRadius: 6,
+                            tension: 0
+                        },
+                        {
+                            label: 'Con Fitorregulador',
+                            data: [7, 9],
+                            borderColor: '#52b788',
+                            backgroundColor: '#52b788',
+                            borderWidth: 3,
+                            pointRadius: 6,
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Longitud Promedio del Tallo (cm)',
+                                color: '#95d5b2',
+                                font: { size: 11, family: 'Inter' }
+                            },
+                            grid: { color: 'rgba(82, 183, 136, 0.1)' },
+                            ticks: { color: '#95d5b2' },
+                            suggestedMin: 0,
+                            suggestedMax: 15
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Exposición a Luz',
+                                color: '#95d5b2',
+                                font: { size: 11, family: 'Inter' }
+                            },
+                            grid: { color: 'rgba(82, 183, 136, 0.1)' },
+                            ticks: { color: '#f2faf5', font: { weight: 'bold' } }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f2faf5',
+                                font: { family: 'Inter', size: 12 },
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (!state.chartInstance || !state.means) return;
+            const m = state.means;
+
+            state.chartInstance.data.datasets[0].data = [m.mean1, m.mean2];
+            state.chartInstance.data.datasets[1].data = [m.mean3, m.mean4];
+            state.chartInstance.update();
+        }
+
+        function calculateANOVA() {
+            const data = state.currentData;
+            const n = 5;
+            const N = 20;
+
+            const T1 = data.t1.reduce((a, b) => a + b, 0);
+            const T2 = data.t2.reduce((a, b) => a + b, 0);
+            const T3 = data.t3.reduce((a, b) => a + b, 0);
+            const T4 = data.t4.reduce((a, b) => a + b, 0);
+
+            const GrandTotal = T1 + T2 + T3 + T4;
+            const CF = (GrandTotal * GrandTotal) / N;
+
+            let sumSqTotal = 0;
+            [...data.t1, ...data.t2, ...data.t3, ...data.t4].forEach(v => { sumSqTotal += v * v; });
+            const SST = sumSqTotal - CF;
+
+            const SSTr = ((T1*T1 + T2*T2 + T3*T3 + T4*T4) / n) - CF;
+
+            // Factor A = Fitorregulador (T1+T2 vs T3+T4)
+            const A_minus = T1 + T2;
+            const A_plus = T3 + T4;
+            const SSA = ((A_minus*A_minus + A_plus*A_plus) / (2 * n)) - CF;
+
+            // Factor B = Luz (T1+T3 vs T2+T4)
+            const B_minus = T1 + T3;
+            const B_plus = T2 + T4;
+            const SSB = ((B_minus*B_minus + B_plus*B_plus) / (2 * n)) - CF;
+
+            const SSAB = Math.max(0, SSTr - SSA - SSB);
+            const SSE = Math.max(0.0001, SST - SSTr);
+
+            const dfA = 1, dfB = 1, dfAB = 1, dfE = 16, dfTotal = 19;
+
+            const MSA = SSA / dfA;
+            const MSB = SSB / dfB;
+            const MSAB = SSAB / dfAB;
+            const MSE = SSE / dfE;
+
+            const FA = MSA / MSE;
+            const FB = MSB / MSE;
+            const FAB = MSAB / MSE;
+
+            const pA = calculatePValue(FA);
+            const pB = calculatePValue(FB);
+            const pAB = calculatePValue(FAB);
+
+            document.getElementById('anova-body').innerHTML = `
+                <tr class="hover:bg-botanical-800/30">
+                    <td class="py-2 px-3 font-sans font-medium text-slate-200">Fitorregulador</td>
+                    <td class="py-2 px-3 text-right">${SSA.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-center">${dfA}</td>
+                    <td class="py-2 px-3 text-right">${MSA.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-right font-bold">${FA.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-right ${pA < 0.05 ? 'text-botanical-300 font-bold' : 'text-slate-400'}">${pA < 0.001 ? 'menor a 0.001' : pA.toFixed(3)}</td>
+                    <td class="py-2 px-3 text-center ${pA < 0.05 ? 'text-botanical-300 font-bold' : 'text-slate-400'}">${pA < 0.05 ? 'Significativo' : 'No significativo'}</td>
+                </tr>
+                <tr class="hover:bg-botanical-800/30">
+                    <td class="py-2 px-3 font-sans font-medium text-slate-200">Luz</td>
+                    <td class="py-2 px-3 text-right">${SSB.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-center">${dfB}</td>
+                    <td class="py-2 px-3 text-right">${MSB.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-right font-bold">${FB.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-right ${pB < 0.05 ? 'text-botanical-300 font-bold' : 'text-slate-400'}">${pB < 0.001 ? 'menor a 0.001' : pB.toFixed(3)}</td>
+                    <td class="py-2 px-3 text-center ${pB < 0.05 ? 'text-botanical-300 font-bold' : 'text-slate-400'}">${pB < 0.05 ? 'Significativo' : 'No significativo'}</td>
+                </tr>
+                <tr class="${pAB < 0.05 ? 'bg-botanical-800/60 font-semibold' : 'hover:bg-botanical-800/30'}">
+                    <td class="py-2 px-3 font-sans font-medium text-slate-100 flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrows-split-up-and-left text-botanical-400"></i> Interacción (Fitorregulador × Luz)
+                    </td>
+                    <td class="py-2 px-3 text-right">${SSAB.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-center">${dfAB}</td>
+                    <td class="py-2 px-3 text-right">${MSAB.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-right font-bold ${pAB < 0.05 ? 'text-botanical-300' : ''}">${FAB.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-right ${pAB < 0.05 ? 'text-botanical-300 font-bold bg-botanical-500/20 rounded' : 'text-slate-400'}">${pAB < 0.001 ? 'menor a 0.001' : pAB.toFixed(3)}</td>
+                    <td class="py-2 px-3 text-center ${pAB < 0.05 ? 'text-botanical-300 font-bold' : 'text-slate-400'}">${pAB < 0.05 ? 'Significativo' : 'No significativo'}</td>
+                </tr>
+                <tr class="hover:bg-botanical-800/20 text-slate-400">
+                    <td class="py-2 px-3 font-sans">Error Experim. (Variabilidad Biol.)</td>
+                    <td class="py-2 px-3 text-right">${SSE.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-center">${dfE}</td>
+                    <td class="py-2 px-3 text-right">${MSE.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-right">-</td>
+                    <td class="py-2 px-3 text-right">-</td>
+                    <td class="py-2 px-3 text-center">-</td>
+                </tr>
+                <tr class="border-t border-botanical-700 font-bold text-slate-200">
+                    <td class="py-2 px-3 font-sans">TOTAL</td>
+                    <td class="py-2 px-3 text-right">${SST.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-center">${dfTotal}</td>
+                    <td class="py-2 px-3 text-right">-</td>
+                    <td class="py-2 px-3 text-right">-</td>
+                    <td class="py-2 px-3 text-right">-</td>
+                    <td class="py-2 px-3 text-center">-</td>
+                </tr>
+            `;
+
+            const tagContainer = document.getElementById('anova-status-tag');
+            if (pAB < 0.05) {
+                tagContainer.className = "text-xs px-2.5 py-1 rounded-lg font-bold bg-botanical-500/20 text-botanical-300 border border-botanical-500/40 flex items-center gap-1.5";
+                tagContainer.innerHTML = `<i class="fa-solid fa-circle-check"></i> Interacción Significativa`;
+            } else {
+                tagContainer.className = "text-xs px-2.5 py-1 rounded-lg font-medium bg-botanical-900/80 text-slate-400 border border-botanical-800 flex items-center gap-1.5";
+                tagContainer.innerHTML = `<i class="fa-solid fa-circle-minus"></i> Sin Interacción Significativa`;
+            }
+
+            renderDirectInterpretation();
+        }
+
+        function calculatePValue(F) {
+            if (F <= 0 || isNaN(F)) return 1.0;
+            let z = Math.sqrt(F);
+            let t = 1 / (1 + 0.2316419 * z);
+            let d = 0.3989423 * Math.exp(-z * z / 2);
+            let p = 2 * (d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))));
+            return Math.max(0.0001, Math.min(0.9999, p));
+        }
+
+        function renderDirectInterpretation() {
+            const container = document.getElementById('interpretation-text');
+            
+            if (state.interactionType === 'independence') {
+                container.innerHTML = `
+                    <p class="text-slate-200 font-semibold"><strong>Comportamiento Aditivo Independiente:</strong></p>
+                    <p class="text-slate-300">
+                        Cada factor incrementa el crecimiento de forma autónoma. Agregar fitorregulador estimula el tallo en la misma proporción (aproximadamente 4 cm adicionales), independientemente de si el frasco se encuentra a la luz o a oscuras.
+                    </p>
+                    <div class="bg-botanical-900/80 p-3 rounded-xl border border-botanical-800 text-botanical-300 mt-2 font-medium">
+                        🌿 <strong>Señal Gráfica y Estadística:</strong> Las líneas de la gráfica se observan <strong>paralelas</strong>. En la tabla ANOVA, el resultado para la Interacción es <em>No significativo</em> (valor p mayor a 0.05).
+                    </div>
+                `;
+            } else if (state.interactionType === 'synergy') {
+                container.innerHTML = `
+                    <p class="text-botanical-300 font-bold"><strong>Efecto Potenciado de Sinergia:</strong></p>
+                    <p class="text-slate-300">
+                        La presencia conjunta de fitorregulador y luz genera una estimulación superior a la suma de sus efectos por separado, impulsando la elongación del tallo hasta un promedio de <strong>${state.means.mean4.toFixed(1)} cm</strong>.
+                    </p>
+                    <div class="bg-botanical-950/80 p-3 rounded-xl border border-botanical-700/50 text-botanical-200 mt-2 font-medium">
+                        🚀 <strong>Señal Gráfica y Estadística:</strong> Las líneas en la gráfica <strong>divergen abiertamente</strong> hacia arriba. En la tabla ANOVA, la Interacción resulta <em>Significativa</em> (valor p menor a 0.05).
+                    </div>
+                `;
+            } else if (state.interactionType === 'antagonism') {
+                container.innerHTML = `
+                    <p class="text-amber-300 font-bold"><strong>Efecto Antagónico (Inhibición Recíproca):</strong></p>
+                    <p class="text-slate-300">
+                        El fitorregulador elonga fuertemente el tallo en la oscuridad, pero al exponer el cultivo a la luz, la respuesta se bloquea o altera, reduciendo la longitud promedio a <strong>${state.means.mean4.toFixed(1)} cm</strong>.
+                    </p>
+                    <div class="bg-amber-950/40 p-3 rounded-xl border border-amber-800/40 text-amber-200 mt-2 font-medium">
+                        ⚠️ <strong>Señal Gráfica y Estadística:</strong> Las pendientes cambian de sentido y las líneas <strong>se cruzan</strong>. En la tabla ANOVA, la Interacción es <em>Significativa</em> (valor p menor a 0.05).
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
