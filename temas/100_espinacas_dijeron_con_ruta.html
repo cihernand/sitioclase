@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MÁS DE 100 ESPINACAS DIJERON - Datatón Estadístico</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: '#FFD700',
+                            amber: '#F59E0B',
+                            neonGreen: '#10B981',
+                            cyan: '#06B6D4',
+                            purple: '#8B5CF6',
+                            rose: '#F43F5E',
+                            darkBg: '#0B0F19',
+                            cardBg: '#1E293B',
+                            boardBorder: '#334155'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0B0F19;
+            color: #F8FAFC;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .game-board-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 2px solid #334155;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* Perspective Flip for Game Show Cards */
+        .flip-card {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Studio Bulb Pulsing Animations */
+        @keyframes studioBulb {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(0.85); }
+        }
+        .bulb-glow {
+            animation: studioBulb 2s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 md:p-6 overflow-x-hidden">
+
+    <header class="w-full max-w-7xl mx-auto mb-4">
+        <div class="game-board-card rounded-2xl p-4 relative overflow-hidden border-2 border-brand-amber/40">
+            <!-- Studio Decorative Bulbs -->
+            <div class="flex justify-between items-center mb-2 px-2">
+                <div class="flex space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 bulb-glow"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 bulb-glow" style="animation-delay: 0.3s"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 bulb-glow" style="animation-delay: 0.6s"></span>
+                </div>
+                <div class="text-[11px] uppercase tracking-widest font-mono text-brand-amber font-bold">
+                    <i class="fa-solid fa-flask-vial mr-1"></i> Datatón Estadístico - Ingeniería en Biotecnología
+                </div>
+                <div class="flex space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 bulb-glow" style="animation-delay: 0.9s"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 bulb-glow" style="animation-delay: 1.2s"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 bulb-glow" style="animation-delay: 1.5s"></span>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <!-- Banner Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-br from-amber-400 to-yellow-600 text-slate-950 font-extrabold px-3 py-2 rounded-xl shadow-lg text-xl md:text-2xl font-mono text-center leading-none">
+                        +100
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-black tracking-tight text-white uppercase italic">
+                            MÁS DE 100 ESPINACAS DIJERON
+                        </h1>
+                        <p class="text-xs text-slate-400 font-mono">
+                            Flujo: <span class="text-emerald-400 font-bold">1. OBSERVAR</span> &rarr; <span class="text-cyan-400 font-bold">2. COMPARAR</span> &rarr; <span class="text-amber-400 font-bold">3. INTERPRETAR</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Scoreboard & Sound Control -->
+                <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+                    <div class="bg-slate-900/90 border border-amber-500/50 px-3 py-1.5 rounded-xl text-center min-w-[90px]">
+                        <span class="block text-[9px] text-amber-400 font-mono uppercase tracking-wider">Puntos</span>
+                        <span id="playerScore" class="text-xl font-black font-mono text-amber-300">0</span>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-700 px-3 py-1.5 rounded-xl text-center min-w-[90px]">
+                        <span class="block text-[9px] text-slate-400 font-mono uppercase tracking-wider">Errores</span>
+                        <div id="errorsContainer" class="text-base font-black text-red-500 space-x-1">
+                            <span class="opacity-20">X</span><span class="opacity-20">X</span><span class="opacity-20">X</span>
+                        </div>
+                    </div>
+                    <button id="audioToggleBtn" onclick="toggleAudio()" class="p-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl text-slate-300 transition-all" title="Sonido On/Off">
+                        <i id="audioIcon" class="fa-solid fa-volume-high"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-7xl mx-auto flex-grow space-y-4">
+        
+        <!-- Workflow Pillars Navigation Tabs -->
+        <nav class="flex flex-wrap gap-2 p-1.5 bg-slate-900/80 backdrop-blur border border-slate-800 rounded-xl">
+            <button onclick="setActiveTab('observe')" id="tab-observe" class="tab-btn flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md">
+                <i class="fa-solid fa-eye"></i> 1. OBSERVAR
+            </button>
+            <button onclick="setActiveTab('compare')" id="tab-compare" class="tab-btn flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                <i class="fa-solid fa-chart-line"></i> 2. COMPARAR (4 GRÁFICAS)
+            </button>
+            <button onclick="setActiveTab('interpret')" id="tab-interpret" class="tab-btn flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                <i class="fa-solid fa-brain"></i> 3. INTERPRETAR (QUIZ)
+            </button>
+            <button onclick="setActiveTab('mountain')" id="tab-mountain" class="tab-btn flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                <i class="fa-solid fa-mountain text-amber-400"></i> 4. RUTA CIMA (EXPEDICIÓN)
+            </button>
+        </nav>
+
+        <!-- Response Variable Selection Bar -->
+        <div class="game-board-card p-3 rounded-xl flex flex-wrap items-center justify-between gap-2 border border-slate-700">
+            <span class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-filter text-amber-400"></i> Variable Fisiológica:
+            </span>
+            <div id="variableSelectorGroup" class="flex flex-wrap gap-1.5 flex-grow justify-end">
+                <!-- Dynamic Pill Buttons Injected via JS -->
+            </div>
+        </div>
+
+        <!-- ================= TAB 1: OBSERVAR ================= -->
+        <section id="panel-observe" class="space-y-4">
+            
+            <!-- Quick Stat Summary Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="quickStatCards">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Descriptive Statistics Table -->
+            <div class="game-board-card p-4 rounded-2xl space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                    <h2 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-table"></i> Resumen de Estadística Descriptiva por Tratamiento
+                    </h2>
+                    <span class="text-[10px] font-mono text-slate-400">Muestra en tiempo real</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs font-mono text-slate-300">
+                        <thead class="bg-slate-900 text-amber-400 uppercase text-[10px] border-b border-slate-800">
+                            <tr>
+                                <th class="p-2.5">Tratamiento</th>
+                                <th class="p-2.5 text-center">N Teórico</th>
+                                <th class="p-2.5 text-center">N Efectivo</th>
+                                <th class="p-2.5 text-center">% Faltantes</th>
+                                <th class="p-2.5 text-right">Promedio (μ)</th>
+                                <th class="p-2.5 text-right">Desv. Est. (S)</th>
+                                <th class="p-2.5 text-right">Error Est. (SE)</th>
+                                <th class="p-2.5 text-right">CV (%)</th>
+                                <th class="p-2.5 text-center">IC 95%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="descriptiveTableBody" class="divide-y divide-slate-800/60">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Parameters Modifier Controls -->
+            <div class="game-board-card p-4 rounded-2xl space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                    <h2 class="text-xs font-bold text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-emerald-400"></i> Modificador de Parámetros Muestrales
+                    </h2>
+                    <button onclick="resetSliders()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 font-mono rounded-lg border border-slate-600 transition-all">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Restablecer
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-slate-300">% Datos Faltantes:</span>
+                            <span id="val-missingRate" class="text-rose-400 font-bold">10%</span>
+                        </div>
+                        <input type="range" id="slider-missingRate" min="0" max="30" value="10" step="1" oninput="updateDataModifiers()" class="w-full accent-rose-400 bg-slate-800 rounded cursor-pointer">
+                    </div>
+
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-slate-300">Factor de Ruido (S %):</span>
+                            <span id="val-sdFactor" class="text-amber-400 font-bold">100%</span>
+                        </div>
+                        <input type="range" id="slider-sdFactor" min="30" max="250" value="100" step="5" oninput="updateDataModifiers()" class="w-full accent-amber-400 bg-slate-800 rounded cursor-pointer">
+                    </div>
+
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-slate-300">Base N / Equipo:</span>
+                            <span id="val-plantsPerTeam" class="text-emerald-400 font-bold">36</span>
+                        </div>
+                        <input type="range" id="slider-plantsPerTeam" min="10" max="50" value="36" step="2" oninput="updateDataModifiers()" class="w-full accent-emerald-400 bg-slate-800 rounded cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================= TAB 2: COMPARAR ================= -->
+        <section id="panel-compare" class="hidden space-y-4">
+            
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-2 bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                <div class="text-xs font-mono text-slate-300">
+                    <i class="fa-solid fa-chart-pie text-cyan-400 mr-1.5"></i> Visualización Bivariada e Inferencial (4 Gráficas en paralelo)
+                </div>
+                <!-- Error Bar Selector for Chart 1 -->
+                <div class="flex items-center gap-1 text-[11px] font-mono bg-slate-950 p-1 rounded-lg border border-slate-800">
+                    <span class="text-slate-400 px-1">Error Gráfica 1:</span>
+                    <button onclick="setErrorBarType('SD')" id="errBtn-SD" class="px-2 py-0.5 rounded bg-emerald-500 text-slate-950 font-bold">SD</button>
+                    <button onclick="setErrorBarType('SE')" id="errBtn-SE" class="px-2 py-0.5 rounded text-slate-400 hover:text-white">SE</button>
+                    <button onclick="setErrorBarType('CI')" id="errBtn-CI" class="px-2 py-0.5 rounded text-slate-400 hover:text-white">IC 95%</button>
+                </div>
+            </div>
+
+            <!-- 4 CHARTS GRID -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                
+                <!-- Chart 1: Means + Error Bars -->
+                <div class="game-board-card p-4 rounded-2xl space-y-2">
+                    <h2 class="text-xs font-bold text-emerald-400 flex items-center justify-between border-b border-slate-700 pb-2">
+                        <span><i class="fa-solid fa-chart-column mr-1.5"></i> Gráfica 1: Promedios y Barras de Error</span>
+                        <span class="text-[10px] text-slate-400 font-mono" id="chart1Sublabel">Modo: SD</span>
+                    </h2>
+                    <div class="h-60 relative">
+                        <canvas id="chartMeans"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Visualización Multivariada (Radar / Perfil Fisiológico) -->
+                <div class="game-board-card p-4 rounded-2xl space-y-2">
+                    <h2 class="text-xs font-bold text-amber-400 flex items-center justify-between border-b border-slate-700 pb-2">
+                        <span><i class="fa-solid fa-spider mr-1.5"></i> Gráfica 2: Visualización Multivariada (Perfil Fisiológico)</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Perfil Normalizado (0-100%)</span>
+                    </h2>
+                    <div class="h-60 relative">
+                        <canvas id="chartMultivariate"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Individual Biological Replicates (Jitter Plot) -->
+                <div class="game-board-card p-4 rounded-2xl space-y-2">
+                    <h2 class="text-xs font-bold text-cyan-400 flex items-center justify-between border-b border-slate-700 pb-2">
+                        <span><i class="fa-solid fa-braille mr-1.5"></i> Gráfica 3: Réplicas Biológicas Individuales</span>
+                        <span class="text-[10px] text-slate-400 font-mono">1 Punto = 1 Planta</span>
+                    </h2>
+                    <div class="h-60 relative">
+                        <canvas id="chartJitter"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 4: 95% Confidence Intervals (Inferential) -->
+                <div class="game-board-card p-4 rounded-2xl space-y-2">
+                    <h2 class="text-xs font-bold text-purple-400 flex items-center justify-between border-b border-slate-700 pb-2">
+                        <span><i class="fa-solid fa-arrows-left-right-to-line mr-1.5"></i> Gráfica 4: Intervalos de Confianza al 95%</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Traslape = Comparación Inferencial</span>
+                    </h2>
+                    <div class="h-60 relative">
+                        <canvas id="chartCI"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bivariate Pairwise Comparison Tool & ANOVA Box -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                
+                <div class="lg:col-span-2 game-board-card p-4 rounded-2xl space-y-3">
+                    <div class="border-b border-slate-700 pb-2 flex items-center justify-between">
+                        <h2 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+                            <i class="fa-solid fa-code-compare text-emerald-400"></i> Comparador Bivariado de Tratamientos
+                        </h2>
+                        <span class="text-[10px] font-mono text-slate-400">Prueba Visual de Traslape IC 95%</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+                            <label class="block text-[11px] font-mono text-emerald-400 font-bold mb-1">Tratamiento A:</label>
+                            <select id="selectTreatA" onchange="updatePairwiseComparison()" class="w-full bg-slate-800 border border-slate-700 text-xs font-mono rounded-lg p-1.5 text-slate-200">
+                                <!-- Options injected -->
+                            </select>
+                        </div>
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+                            <label class="block text-[11px] font-mono text-cyan-400 font-bold mb-1">Tratamiento B:</label>
+                            <select id="selectTreatB" onchange="updatePairwiseComparison()" class="w-full bg-slate-800 border border-slate-700 text-xs font-mono rounded-lg p-1.5 text-slate-200">
+                                <!-- Options injected -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="pairwiseResultBox" class="bg-slate-900/90 p-3 rounded-xl border border-slate-800 font-mono text-xs space-y-2">
+                        <!-- Dynamic Comparison Stats Injected -->
+                    </div>
+                </div>
+
+                <!-- ANOVA Mini Summary -->
+                <div class="game-board-card p-4 rounded-2xl flex flex-col justify-between space-y-3">
+                    <div>
+                        <h2 class="text-sm font-bold text-cyan-400 flex items-center gap-2 border-b border-slate-700 pb-2">
+                            <i class="fa-solid fa-square-poll-vertical"></i> Tabla ANOVA (1 Vía)
+                        </h2>
+                        <div id="anovaMiniBox" class="mt-3 space-y-2 font-mono text-xs">
+                            <!-- Injected -->
+                        </div>
+                    </div>
+
+                    <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] font-mono text-slate-400 space-y-1">
+                        <div class="text-amber-400 font-bold"><i class="fa-solid fa-circle-info"></i> Nota Criterio:</div>
+                        <p>Evalúa el nivel de traslape entre intervalos de confianza al 95% para analizar las diferencias inferenciales.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= TAB 3: INTERPRETAR ================= -->
+        <section id="panel-interpret" class="hidden space-y-4">
+            <div class="game-board-card p-5 rounded-2xl space-y-4">
+                
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-700 pb-3">
+                    <div>
+                        <h2 class="text-lg font-black text-amber-400 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-gamepad text-yellow-400"></i> Tablero de Preguntas: Más de 100 Espinacas Dijeron
+                        </h2>
+                        <p class="text-xs text-slate-400">
+                            Preguntas conceptuales de bioestadística para principiantes contextualizadas con la variable respuesta activa.
+                        </p>
+                    </div>
+                    <button onclick="resetQuizProgress()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-300 rounded-lg border border-slate-600">
+                        <i class="fa-solid fa-rotate mr-1"></i> Reiniciar Tablero
+                    </button>
+                </div>
+
+                <!-- 10 Interactive Cards Grid -->
+                <div id="quizBoardGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <!-- Cards injected -->
+                </div>
+
+                <!-- Active Question Stage -->
+                <div id="activeQuestionCard" class="bg-slate-900/90 border-2 border-amber-500/50 rounded-2xl p-5 shadow-2xl relative">
+                    <div class="flex justify-between items-center mb-3">
+                        <span id="qCategoryBadge" class="text-xs font-mono px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full font-bold">
+                            PREGUNTA N° 1
+                        </span>
+                        <span id="qPointsBadge" class="text-xs font-mono text-cyan-400 font-bold">
+                            Valor: 100 Puntos
+                        </span>
+                    </div>
+
+                    <h3 id="questionTitle" class="text-base md:text-lg font-bold text-white mb-4 leading-relaxed">
+                        Cargando pregunta...
+                    </h3>
+
+                    <!-- Dynamic Options -->
+                    <div id="optionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- 4 multiple choice buttons -->
+                    </div>
+
+                    <!-- Feedback Box -->
+                    <div id="quizFeedbackBox" class="mt-4 p-4 rounded-xl hidden text-xs font-mono border transition-all">
+                        <!-- Feedback injected -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: RUTA CIMA (EXPEDICIÓN EN TIEMPO REAL) ================= -->
+        <section id="panel-mountain" class="hidden space-y-4">
+            <div class="game-board-card p-4 md:p-6 rounded-2xl space-y-5">
+                
+                <!-- Datathon Live Control & Altitude Header -->
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-700 pb-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-mono font-bold uppercase tracking-wider">
+                                Mode: En Vivo Datatón
+                            </span>
+                            <span class="text-xs font-mono text-emerald-400 font-bold" id="mountainAltitudeText">
+                                <i class="fa-solid fa-mountain-sun mr-1"></i> Altitud: 0 m (Base)
+                            </span>
+                        </div>
+                        <h2 class="text-xl font-black text-white uppercase italic tracking-wide mt-1">
+                            Ascenso Estadístico a la Cima Biotecnológica
+                        </h2>
+                        <p class="text-xs text-slate-400">
+                            Completa los estadios respondiendo el quiz y ajustando parámetros para coronar la cima.
+                        </p>
+                    </div>
+
+                    <!-- Live Datathon Stopwatch Timer -->
+                    <div class="flex items-center gap-3 bg-slate-900/90 p-3 rounded-xl border border-slate-800 w-full md:w-auto justify-between md:justify-end">
+                        <div>
+                            <span class="block text-[9px] text-slate-400 font-mono uppercase">Tiempo de Datatón</span>
+                            <span id="datathonTimerDisplay" class="text-xl font-black font-mono text-cyan-300 tracking-wider">00:00:00</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="toggleDatathonTimer()" id="timerToggleBtn" class="p-2 bg-emerald-600 hover:bg-emerald-500 text-slate-950 rounded-lg text-xs font-bold transition-all" title="Iniciar/Pausar Cronómetro">
+                                <i class="fa-solid fa-play" id="timerIcon"></i>
+                            </button>
+                            <button onclick="resetDatathonTimer()" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs border border-slate-600 transition-all" title="Reiniciar Cronómetro">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Mountain Route Map (SVG Route + Dynamic Climber Avatar) -->
+                <div class="relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border-2 border-slate-700 rounded-2xl overflow-hidden p-4 min-h-[360px] flex flex-col justify-between">
+                    
+                    <!-- Decorative Sky Elements & Stars -->
+                    <div class="absolute inset-0 opacity-30 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+
+                    <!-- SVG Mountain Graphic with Trail Nodes -->
+                    <div class="relative w-full h-[320px]">
+                        <svg class="w-full h-full" viewBox="0 0 800 320" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="mountainGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#334155" stop-opacity="0.9" />
+                                    <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95" />
+                                </linearGradient>
+                                <linearGradient id="snowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#f8fafc" />
+                                    <stop offset="100%" stop-color="#cbd5e1" />
+                                </linearGradient>
+                            </defs>
+
+                            <!-- Background Mountain Silhouette -->
+                            <polygon points="50,320 220,120 380,320" fill="#1e293b" opacity="0.5" />
+                            <polygon points="520,320 680,80 800,320" fill="#1e293b" opacity="0.6" />
+
+                            <!-- Main Mountain Peak Silhouette -->
+                            <polygon points="80,320 420,30 760,320" fill="url(#mountainGrad)" stroke="#475569" stroke-width="2" />
+                            <!-- Snow Cap on Peak -->
+                            <polygon points="380,60 420,30 460,60 440,75 420,68 400,75" fill="url(#snowGrad)" />
+
+                            <!-- Winding Route Path Line -->
+                            <path id="mountainTrailPath" d="M 120 290 Q 220 260 250 220 T 400 160 T 420 40" fill="none" stroke="#f59e0b" stroke-width="4" stroke-dasharray="6,6" />
+
+                            <!-- Stage Milestone Nodes on SVG Path -->
+                            <!-- Stage 1: Base Camp -->
+                            <circle cx="120" cy="290" r="12" class="fill-slate-900 stroke-emerald-400 stroke-2" />
+                            <!-- Stage 2: Descriptivo -->
+                            <circle cx="210" cy="250" r="12" class="fill-slate-900 stroke-cyan-400 stroke-2" />
+                            <!-- Stage 3: Bivariado -->
+                            <circle cx="290" cy="195" r="12" class="fill-slate-900 stroke-purple-400 stroke-2" />
+                            <!-- Stage 4: Paso ANOVA -->
+                            <circle cx="360" cy="120" r="12" class="fill-slate-900 stroke-amber-400 stroke-2" />
+                            <!-- Stage 5: Cima -->
+                            <circle cx="420" cy="40" r="14" class="fill-amber-400 stroke-yellow-200 stroke-2 animate-pulse" />
+                        </svg>
+
+                        <!-- Dynamic Climber Marker Overlay (Positioned along trail via JS) -->
+                        <div id="climberAvatar" class="absolute transition-all duration-700 ease-out flex flex-col items-center -translate-x-1/2 -translate-y-full" style="left: 15%; top: 90%;">
+                            <div class="bg-amber-400 text-slate-950 text-[10px] font-black font-mono px-2 py-0.5 rounded-full shadow-lg border border-yellow-200 flex items-center gap-1 whitespace-nowrap">
+                                <i class="fa-solid fa-person-hiking animate-bounce"></i> Equipo Explorador
+                            </div>
+                            <div class="w-3 h-3 bg-amber-400 rotate-45 -mt-1 shadow-md"></div>
+                        </div>
+
+                        <!-- Summit Victory Flag Marker -->
+                        <div class="absolute left-[52.5%] top-[5%] -translate-x-1/2 flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 px-2 py-1 rounded-lg border border-yellow-300 font-black text-[10px] shadow-xl">
+                            <i class="fa-solid fa-flag text-rose-600 animate-pulse"></i> CIMA 8,848m
+                        </div>
+                    </div>
+
+                    <!-- Estadios Detailed Status Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 mt-2 pt-2 border-t border-slate-800">
+                        <div id="stageCard-1" class="bg-slate-900/90 p-2 rounded-xl border border-emerald-500/50 text-center space-y-1">
+                            <span class="text-[9px] font-mono text-emerald-400 font-bold block">ESTADIO 1 (0m)</span>
+                            <span class="text-xs font-bold text-white block">Campamento Base</span>
+                            <span class="text-[9px] text-slate-400 block">Muestreo & Limpieza</span>
+                            <span class="inline-block px-1.5 py-0.5 text-[8px] font-mono bg-emerald-500/20 text-emerald-300 rounded font-bold">COMPLETADO</span>
+                        </div>
+                        <div id="stageCard-2" class="bg-slate-900/90 p-2 rounded-xl border border-slate-800 text-center space-y-1 opacity-70">
+                            <span class="text-[9px] font-mono text-cyan-400 font-bold block">ESTADIO 2 (2,000m)</span>
+                            <span class="text-xs font-bold text-white block">Paso Descriptivo</span>
+                            <span class="text-[9px] text-slate-400 block">Media, SD & CV%</span>
+                            <span id="stageStatus-2" class="inline-block px-1.5 py-0.5 text-[8px] font-mono bg-slate-800 text-slate-400 rounded">BLOQUEADO</span>
+                        </div>
+                        <div id="stageCard-3" class="bg-slate-900/90 p-2 rounded-xl border border-slate-800 text-center space-y-1 opacity-70">
+                            <span class="text-[9px] font-mono text-purple-400 font-bold block">ESTADIO 3 (4,500m)</span>
+                            <span class="text-xs font-bold text-white block">Cresta Bivariada</span>
+                            <span class="text-[9px] text-slate-400 block">4 Gráficas & IC 95%</span>
+                            <span id="stageStatus-3" class="inline-block px-1.5 py-0.5 text-[8px] font-mono bg-slate-800 text-slate-400 rounded">BLOQUEADO</span>
+                        </div>
+                        <div id="stageCard-4" class="bg-slate-900/90 p-2 rounded-xl border border-slate-800 text-center space-y-1 opacity-70">
+                            <span class="text-[9px] font-mono text-amber-400 font-bold block">ESTADIO 4 (6,800m)</span>
+                            <span class="text-xs font-bold text-white block">Desfiladero ANOVA</span>
+                            <span class="text-[9px] text-slate-400 block">Pruebas de Hipótesis</span>
+                            <span id="stageStatus-4" class="inline-block px-1.5 py-0.5 text-[8px] font-mono bg-slate-800 text-slate-400 rounded">BLOQUEADO</span>
+                        </div>
+                        <div id="stageCard-5" class="bg-slate-900/90 p-2 rounded-xl border border-slate-800 text-center space-y-1 opacity-70">
+                            <span class="text-[9px] font-mono text-yellow-400 font-bold block">ESTADIO 5 (8,848m)</span>
+                            <span class="text-xs font-bold text-white block">Cima Estadística</span>
+                            <span class="text-[9px] text-slate-400 block">Conclusión Biotec.</span>
+                            <span id="stageStatus-5" class="inline-block px-1.5 py-0.5 text-[8px] font-mono bg-slate-800 text-slate-400 rounded">BLOQUEADO</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Live Expedition Objective & Instructions Box -->
+                <div class="bg-slate-900/90 p-4 rounded-xl border border-amber-500/30 flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-mono">
+                    <div class="space-y-1">
+                        <span class="text-amber-400 font-bold flex items-center gap-1.5">
+                            <i class="fa-solid fa-bullseye"></i> Consigna para el Datatón en Tiempo Real:
+                        </span>
+                        <p class="text-slate-300">
+                            Gana puntos respondiendo acertadamente las preguntas del Quiz (Pestaña 3) o ajustando los parámetros para hacer avanzar a tu equipo hacia la Cumbre Estadística.
+                        </p>
+                    </div>
+                    <button onclick="setActiveTab('interpret')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg shadow-lg whitespace-nowrap transition-all">
+                        Ir al Quiz para Ganar Altitud <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="w-full max-w-7xl mx-auto mt-6 pt-3 border-t border-slate-800 text-center text-[11px] text-slate-500 font-mono">
+        Datatón Universitario &bull; Ingeniería en Biotecnología &bull; Diseño de Experimentos de Plantas
+    </footer>
+
+    <script>
+        /* ==========================================================================
+           1. EXPERIMENTAL DATA ENGINE & CONSTANTS
+           ========================================================================== */
+        
+        const TREATMENTS = [
+            'agua_grifo',
+            'agua_sf',
+            'agua_residual_espinaca',
+            'extracto_espinaca_1_10',
+            'agua_residual_extracto_espinaca_50_50',
+            'extracto_bacteriano'
+        ];
+
+        // Teams per treatment: Main treatments carried out by 4 teams (144 plants), controls by 1 team (36 plants)
+        const TEAMS_PER_TREATMENT = [4, 1, 4, 4, 4, 1];
+
+        const RESPONSE_VARIABLES = [
+            { id: 'Longitud_Raiz', name: 'Longitud_Raiz', unit: 'cm', baseMean: [14.2, 10.5, 18.6, 22.1, 25.8, 16.4], baseSD: [2.1, 1.8, 2.9, 3.2, 3.5, 2.4] },
+            { id: 'Longitud_Tallo', name: 'Longitud_Tallo', unit: 'cm', baseMean: [8.5, 6.2, 11.4, 14.0, 16.2, 10.1], baseSD: [1.2, 0.9, 1.6, 1.9, 2.1, 1.3] },
+            { id: 'Cantidad_Hojas', name: 'Cantidad_Hojas', unit: 'hojas', baseMean: [6.0, 4.0, 8.0, 11.0, 13.0, 7.0], baseSD: [1.0, 0.8, 1.2, 1.5, 1.8, 1.1] },
+            { id: 'Peso_Humedo', name: 'Peso_Humedo', unit: 'mg', baseMean: [1850, 1200, 2400, 3100, 3850, 2100], baseSD: [250, 180, 350, 420, 500, 280] },
+            { id: 'Tasa_Germinacion', name: 'Tasa_Germinacion', unit: '%', baseMean: [75.0, 60.0, 85.0, 92.0, 96.0, 80.0], baseSD: [6.0, 8.0, 5.0, 4.0, 3.0, 5.5] },
+            { id: 'Actividad_Antioxidante', name: 'Actividad_Antioxidante', unit: 'µmol/g', baseMean: [12.5, 8.0, 22.0, 35.4, 48.2, 19.1], baseSD: [2.0, 1.5, 3.1, 4.2, 5.1, 2.6] }
+        ];
+
+        let currentVarId = 'Longitud_Raiz';
+        let errorBarType = 'SD'; // 'SD', 'SE', 'CI'
+        let basePlantsPerTeam = 36;
+        let missingRate = 10;
+        let globalSdMultiplier = 1.0;
+
+        let rawDataset = {};
+        let computedStats = {};
+        let computedAnova = {};
+
+        // Audio Engine
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        // Quiz State
+        let playerScore = 0;
+        let errorsCount = 0;
+        let activeQuestionIndex = 0;
+        let quizQuestions = [];
+        let answeredQuestions = new Array(10).fill(false);
+
+        // Datatón Timer State
+        let datathonTimerInterval = null;
+        let datathonSeconds = 0;
+        let datathonRunning = false;
+
+        // Chart instances
+        let chartMeansInstance = null;
+        let chartMultivariateInstance = null;
+        let chartJitterInstance = null;
+        let chartCIInstance = null;
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'ding') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.3);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'buzzer') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.setValueAtTime(110, now + 0.15);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'flip') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(160, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                }
+            } catch (e) {}
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('audioIcon');
+            icon.className = soundEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark text-red-400';
+        }
+
+        function getTreatmentColor(idx, alpha = 1.0) {
+            const colors = [
+                `rgba(148, 163, 184, ${alpha})`, // agua_grifo
+                `rgba(244, 63, 94, ${alpha})`,   // agua_sf
+                `rgba(6, 182, 212, ${alpha})`,   // agua_residual_espinaca
+                `rgba(16, 185, 129, ${alpha})`,  // extracto_espinaca_1_10
+                `rgba(245, 158, 11, ${alpha})`,  // agua_residual_extracto_espinaca_50_50
+                `rgba(139, 92, 246, ${alpha})`   // extracto_bacteriano
+            ];
+            return colors[idx % colors.length];
+        }
+
+        function randomGaussian(mean, sd) {
+            let u1 = Math.random();
+            let u2 = Math.random();
+            while (u1 === 0) u1 = Math.random();
+            while (u2 === 0) u2 = Math.random();
+            let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+            let val = mean + z0 * sd;
+            return val < 0.01 ? 0.01 : val;
+        }
+
+        function generateDataset() {
+            rawDataset = {};
+            computedStats = {};
+            computedAnova = {};
+
+            RESPONSE_VARIABLES.forEach(v => {
+                rawDataset[v.id] = [];
+                computedStats[v.id] = [];
+                let allGroupSamples = [];
+
+                v.baseMean.forEach((baseM, tIdx) => {
+                    const teams = TEAMS_PER_TREATMENT[tIdx];
+                    const theoreticalN = teams * basePlantsPerTeam;
+                    const sd = v.baseSD[tIdx] * globalSdMultiplier;
+
+                    const effectiveSamples = [];
+                    let missingCount = 0;
+
+                    for (let i = 0; i < theoreticalN; i++) {
+                        if (Math.random() * 100 < missingRate) {
+                            missingCount++;
+                        } else {
+                            effectiveSamples.push(randomGaussian(baseM, sd));
+                        }
+                    }
+
+                    while (effectiveSamples.length < 5) {
+                        effectiveSamples.push(randomGaussian(baseM, sd));
+                    }
+
+                    effectiveSamples.sort((a, b) => a - b);
+
+                    const nEff = effectiveSamples.length;
+                    const sum = effectiveSamples.reduce((a, b) => a + b, 0);
+                    const mean = sum / nEff;
+                    const variance = effectiveSamples.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (nEff - 1);
+                    const calcSD = Math.sqrt(variance);
+                    const se = calcSD / Math.sqrt(nEff);
+                    const cv = (calcSD / mean) * 100;
+                    const ci95Margin = 1.96 * se;
+
+                    // Calculate Quartiles
+                    const q1 = effectiveSamples[Math.floor(nEff * 0.25)];
+                    const median = effectiveSamples[Math.floor(nEff * 0.50)];
+                    const q3 = effectiveSamples[Math.floor(nEff * 0.75)];
+
+                    rawDataset[v.id].push(effectiveSamples);
+                    computedStats[v.id].push({
+                        nTheoretical: theoreticalN,
+                        nMissing: missingCount,
+                        nEff: nEff,
+                        mean: mean,
+                        sd: calcSD,
+                        se: se,
+                        cv: cv,
+                        q1: q1,
+                        median: median,
+                        q3: q3,
+                        min: effectiveSamples[0],
+                        max: effectiveSamples[nEff - 1],
+                        ciLower: Math.max(0, mean - ci95Margin),
+                        ciUpper: mean + ci95Margin
+                    });
+
+                    allGroupSamples.push(effectiveSamples);
+                });
+
+                computedAnova[v.id] = calculateOneWayANOVA(allGroupSamples);
+            });
+        }
+
+        function calculateOneWayANOVA(groups) {
+            let totalN = 0;
+            let grandSum = 0;
+
+            groups.forEach(g => {
+                totalN += g.length;
+                grandSum += g.reduce((a, b) => a + b, 0);
+            });
+
+            const grandMean = grandSum / totalN;
+            let ssBetween = 0;
+            let ssWithin = 0;
+
+            groups.forEach(g => {
+                const groupMean = g.reduce((a, b) => a + b, 0) / g.length;
+                ssBetween += g.length * Math.pow(groupMean - grandMean, 2);
+                g.forEach(val => {
+                    ssWithin += Math.pow(val - groupMean, 2);
+                });
+            });
+
+            const dfBetween = groups.length - 1;
+            const dfWithin = totalN - groups.length;
+            const msBetween = ssBetween / dfBetween;
+            const msWithin = ssWithin / dfWithin;
+            const fStat = msBetween / msWithin;
+
+            let pValue = 1 / (1 + (fStat / 2.5));
+            if (fStat > 15) pValue = 0.0001;
+            else if (fStat > 8) pValue = 0.001;
+            else if (fStat > 4) pValue = 0.01;
+
+            return { totalN, grandMean, dfBetween, dfWithin, msBetween, msWithin, fStat, pValue };
+        }
+
+        function generateQuizQuestions() {
+            const vObj = RESPONSE_VARIABLES.find(v => v.id === currentVarId) || RESPONSE_VARIABLES[0];
+
+            quizQuestions = [
+                {
+                    id: 1,
+                    points: 100,
+                    category: 'Tendencia Central',
+                    question: `1. En mediciones de ${vObj.name} (${vObj.unit}), si los datos presentan asimetría por valores atípicos, ¿qué medida representa mejor el centro de la distribución?`,
+                    correctAnswer: 'La mediana',
+                    options: shuffleArray(['La mediana', 'El promedio aritmético', 'La desviación estándar', 'El error estándar']),
+                    explanation: 'La mediana es una medida robusta que no se ve distorsionada por valores extremos o asimetría en la muestra.'
+                },
+                {
+                    id: 2,
+                    points: 100,
+                    category: 'Desviación Estándar (S)',
+                    question: `2. En la evaluación de ${vObj.name}, ¿qué representa biológicamente la Desviación Estándar (S)?`,
+                    correctAnswer: 'La dispersión de los datos individuales respecto a la media',
+                    options: shuffleArray([
+                        'La dispersión de los datos individuales respecto a la media',
+                        'La imprecisión del promedio calculado',
+                        'El porcentaje de plantas con datos faltantes',
+                        'La diferencia entre los tratamientos'
+                    ]),
+                    explanation: 'La desviación estándar cuantifica la variabilidad biológica real presente entre los individuos evaluados.'
+                },
+                {
+                    id: 3,
+                    points: 100,
+                    category: 'Coeficiente de Variación',
+                    question: `3. Si se desea comparar la variabilidad relativa de ${vObj.name} con otra variable en distintas unidades, ¿qué estadístico se utiliza?`,
+                    correctAnswer: 'El Coeficiente de Variación (CV%)',
+                    options: shuffleArray(['El Coeficiente de Variación (CV%)', 'La Varianza (S²)', 'El Error Estándar (SE)', 'El Rango total']),
+                    explanation: 'El CV% es adimensional (S/Media × 100) y permite comparar directamente la variabilidad entre variables con distintas escalas.'
+                },
+                {
+                    id: 4,
+                    points: 100,
+                    category: 'Error Estándar (SE)',
+                    question: `4. Al incrementar el número de plantas evaluadas (N efectivo) en el tratamiento agua_grifo, ¿qué le sucede al Error Estándar (SE)?`,
+                    correctAnswer: 'El Error Estándar disminuye',
+                    options: shuffleArray(['El Error Estándar disminuye', 'El Error Estándar aumenta', 'Permanecerá exactamente igual', 'Se vuelve igual a la media']),
+                    explanation: 'Como SE = S / √N, un mayor tamaño de muestra N reduce el error estándar y aumenta la precisión de la estimación.'
+                },
+                {
+                    id: 5,
+                    points: 100,
+                    category: 'Prueba de Hipótesis',
+                    question: `5. Al plantear la Hipótesis Nula (H₀) para la variable ${vObj.name} entre los 6 tratamientos, ¿qué sostiene conceptualmente esta hipótesis?`,
+                    correctAnswer: 'Que no existen diferencias entre los promedios poblacionales',
+                    options: shuffleArray([
+                        'Que no existen diferencias entre los promedios poblacionales',
+                        'Que al menos un tratamiento es superior a los demás',
+                        'Que la varianza de todos los grupos es exactamente cero',
+                        'Que los datos faltantes anulan el experimento'
+                    ]),
+                    explanation: 'La Hipótesis Nula (H₀) plantea la ausencia de efecto o diferencia entre las poblaciones bajo estudio.'
+                },
+                {
+                    id: 6,
+                    points: 100,
+                    category: 'Nivel de Significación (α)',
+                    question: `6. Si establecemos un nivel de significación α = 0.05 en nuestro ensayo de plantas, ¿qué representa este valor?`,
+                    correctAnswer: 'La probabilidad máxima tolerable de cometer un Error Tipo I',
+                    options: shuffleArray([
+                        'La probabilidad máxima tolerable de cometer un Error Tipo I',
+                        'El porcentaje de variabilidad explicada por el tratamiento',
+                        'El margen de error del instrumento de medición',
+                        'La tasa de plantas que sobrevivieron'
+                    ]),
+                    explanation: 'Alpha (α) fija el límite de riesgo aceptable de rechazar H₀ cuando esta es verdaderamente cierta.'
+                },
+                {
+                    id: 7,
+                    points: 100,
+                    category: 'Inferencia (IC 95%)',
+                    question: `7. Al comparar visualmente extracto_espinaca_1_10 vs agua_grifo, ¿qué indica la ausencia de traslape entre sus Intervalos de Confianza al 95%?`,
+                    correctAnswer: 'Evidencia de diferencia estadísticamente significativa',
+                    options: shuffleArray([
+                        'Evidencia de diferencia estadísticamente significativa',
+                        'Que los dos tratamientos producen exactamente el mismo resultado',
+                        'Que se cometió un error en el muestreo de datos',
+                        'Que el tamaño muestral fue insuficiente'
+                    ]),
+                    explanation: 'La falta de solapamiento en los IC del 95% respalda la existencia de diferencias estadísticamente significativas.'
+                },
+                {
+                    id: 8,
+                    points: 100,
+                    category: 'Regla del p-valor',
+                    question: `8. Si obtenemos un p-valor = 0.02 al evaluar ${vObj.name} con α = 0.05, ¿cuál es la regla de decisión adecuada?`,
+                    correctAnswer: 'Se rechaza H₀ al ser p-valor < α',
+                    options: shuffleArray([
+                        'Se rechaza H₀ al ser p-valor < α',
+                        'No se rechaza H₀ porque p-valor > α',
+                        'Se acepta H₀ declarando igualdad absoluta',
+                        'Se descartan los datos por falta de consistencia'
+                    ]),
+                    explanation: 'Cuando el p-valor calculado es menor al nivel α prefijado, se rechaza la hipótesis nula H₀.'
+                },
+                {
+                    id: 9,
+                    points: 100,
+                    category: 'Lógica ANOVA (Estadístico F)',
+                    question: `9. En el análisis ANOVA para ${vObj.name}, ¿cómo se define el estadístico F?`,
+                    correctAnswer: 'Como el cociente entre el Cuadrado Medio de Tratamientos y el Cuadrado Medio del Error',
+                    options: shuffleArray([
+                        'Como el cociente entre el Cuadrado Medio de Tratamientos y el Cuadrado Medio del Error',
+                        'Como la suma de las medias muestrales dividida entre N',
+                        'Como el porcentaje de varianza que se atribuye a los datos faltantes',
+                        'Como la diferencia simple entre el valor máximo y mínimo'
+                    ]),
+                    explanation: 'F = MS_trat / MS_error compara la variabilidad entre grupos respecto a la variabilidad intrínseca o residuo.'
+                },
+                {
+                    id: 10,
+                    points: 100,
+                    category: 'Grados de Libertad Error',
+                    question: `10. En un ANOVA de 1 vía con k tratamientos y N observaciones totales, ¿cómo se calculan los grados de libertad del error (df Error)?`,
+                    correctAnswer: 'df Error = N - k',
+                    options: shuffleArray([
+                        'df Error = N - k',
+                        'df Error = k - 1',
+                        'df Error = N + k',
+                        'df Error = N × k'
+                    ]),
+                    explanation: 'Los grados de libertad del error corresponden al número total de datos N menos el número de grupos k.'
+                }
+            ];
+        }
+
+        function shuffleArray(arr) {
+            let array = [...arr];
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function renderVariableSelectors() {
+            const container = document.getElementById('variableSelectorGroup');
+            container.innerHTML = '';
+
+            RESPONSE_VARIABLES.forEach(v => {
+                const isSelected = v.id === currentVarId;
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1.5 rounded-lg text-xs font-mono transition-all border ${
+                    isSelected 
+                    ? 'bg-amber-500 text-slate-950 font-bold border-amber-400 shadow-md' 
+                    : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800'
+                }`;
+                btn.onclick = () => {
+                    currentVarId = v.id;
+                    updateAllViews();
+                };
+                btn.innerText = `${v.name} (${v.unit})`;
+                container.appendChild(btn);
+            });
+        }
+
+        function renderQuickStatCards() {
+            const container = document.getElementById('quickStatCards');
+            const stats = computedStats[currentVarId];
+            const anova = computedAnova[currentVarId];
+            const vObj = RESPONSE_VARIABLES.find(v => v.id === currentVarId);
+
+            let maxMeanIdx = 0;
+            stats.forEach((s, idx) => {
+                if (s.mean > stats[maxMeanIdx].mean) maxMeanIdx = idx;
+            });
+
+            container.innerHTML = `
+                <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+                    <span class="block text-[10px] font-mono text-slate-400 uppercase">Plantas Medidas</span>
+                    <span class="text-lg font-black font-mono text-emerald-400">${anova.totalN} <span class="text-[10px] text-slate-500">/ 648</span></span>
+                </div>
+                <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+                    <span class="block text-[10px] font-mono text-slate-400 uppercase">Media Más Alta</span>
+                    <span class="text-xs font-bold font-mono text-amber-300 truncate block">${TREATMENTS[maxMeanIdx]}</span>
+                    <span class="text-[10px] text-slate-400 font-mono">${stats[maxMeanIdx].mean.toFixed(1)} ${vObj.unit}</span>
+                </div>
+                <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+                    <span class="block text-[10px] font-mono text-slate-400 uppercase">Estadístico F (ANOVA)</span>
+                    <span class="text-lg font-black font-mono text-cyan-400">${anova.fStat.toFixed(2)}</span>
+                </div>
+                <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+                    <span class="block text-[10px] font-mono text-slate-400 uppercase">P-Valor ANOVA</span>
+                    <span class="text-lg font-black font-mono ${anova.pValue < 0.05 ? 'text-emerald-400' : 'text-slate-300'}">${anova.pValue < 0.001 ? '< 0.001' : anova.pValue.toFixed(3)}</span>
+                </div>
+            `;
+        }
+
+        function renderDescriptiveTable() {
+            const tbody = document.getElementById('descriptiveTableBody');
+            const stats = computedStats[currentVarId];
+            const vObj = RESPONSE_VARIABLES.find(v => v.id === currentVarId);
+
+            tbody.innerHTML = '';
+            stats.forEach((s, i) => {
+                const missingPct = ((s.nMissing / s.nTheoretical) * 100).toFixed(1);
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="p-2.5 font-bold flex items-center gap-1.5" style="color: ${getTreatmentColor(i, 1.0)}">
+                            <span class="w-2 h-2 rounded-full" style="background-color: ${getTreatmentColor(i, 1.0)}"></span>
+                            ${TREATMENTS[i]}
+                        </td>
+                        <td class="p-2.5 text-center text-slate-400">${s.nTheoretical}</td>
+                        <td class="p-2.5 text-center font-bold text-slate-200">${s.nEff}</td>
+                        <td class="p-2.5 text-center text-rose-400">${missingPct}%</td>
+                        <td class="p-2.5 text-right font-bold text-amber-300">${s.mean.toFixed(2)} ${vObj.unit}</td>
+                        <td class="p-2.5 text-right text-slate-300">${s.sd.toFixed(2)}</td>
+                        <td class="p-2.5 text-right text-slate-300">${s.se.toFixed(2)}</td>
+                        <td class="p-2.5 text-right text-cyan-300">${s.cv.toFixed(1)}%</td>
+                        <td class="p-2.5 text-center text-slate-400">[${s.ciLower.toFixed(1)} - ${s.ciUpper.toFixed(1)}]</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderAllFourCharts() {
+            renderChart1Means();
+            renderChart2Multivariate();
+            renderChart3Jitter();
+            renderChart4CI();
+        }
+
+        // Chart 1: Bar Chart + Means + Error Bars (SD / SE / CI)
+        function renderChart1Means() {
+            const ctx = document.getElementById('chartMeans').getContext('2d');
+            const stats = computedStats[currentVarId];
+            const vObj = RESPONSE_VARIABLES.find(v => v.id === currentVarId);
+
+            const labels = TREATMENTS.map(t => t.length > 15 ? t.substring(0, 14) + '..' : t);
+            const means = stats.map(s => s.mean);
+
+            const errors = stats.map(s => {
+                if (errorBarType === 'SD') return s.sd;
+                if (errorBarType === 'SE') return s.se;
+                return (s.ciUpper - s.ciLower) / 2;
+            });
+
+            document.getElementById('chart1Sublabel').innerText = `Modo Barras Error: ${errorBarType}`;
+
+            if (chartMeansInstance) chartMeansInstance.destroy();
+
+            chartMeansInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Promedio (${vObj.unit})`,
+                        data: means,
+                        backgroundColor: TREATMENTS.map((_, i) => getTreatmentColor(i, 0.7)),
+                        borderColor: TREATMENTS.map((_, i) => getTreatmentColor(i, 1.0)),
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8', font: { family: 'Space Grotesk', size: 9 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#cbd5e1', font: { family: 'Outfit', size: 9 } }
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'customErrorBars',
+                    afterDatasetsDraw(chart) {
+                        const { ctx, scales: { y } } = chart;
+                        ctx.save();
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeStyle = '#f8fafc';
+
+                        chart.getDatasetMeta(0).data.forEach((bar, i) => {
+                            const meanVal = means[i];
+                            const errVal = errors[i];
+
+                            const topY = y.getPixelForValue(meanVal + errVal);
+                            const bottomY = y.getPixelForValue(Math.max(0, meanVal - errVal));
+                            const xPos = bar.x;
+
+                            ctx.beginPath();
+                            ctx.moveTo(xPos, topY);
+                            ctx.lineTo(xPos, bottomY);
+                            ctx.stroke();
+
+                            ctx.beginPath();
+                            ctx.moveTo(xPos - 4, topY);
+                            ctx.lineTo(xPos + 4, topY);
+                            ctx.moveTo(xPos - 4, bottomY);
+                            ctx.lineTo(xPos + 4, bottomY);
+                            ctx.stroke();
+                        });
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+
+        // Chart 2: Visualización Multivariada (Radar Plot - Perfil Fisiológico)
+        function renderChart2Multivariate() {
+            const canvas = document.getElementById('chartMultivariate');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const varLabels = RESPONSE_VARIABLES.map(v => v.name.replace(/_/g, ' '));
+
+            const datasets = TREATMENTS.map((t, tIdx) => {
+                const valuesScaled = RESPONSE_VARIABLES.map(v => {
+                    const statsForVar = computedStats[v.id];
+                    if (!statsForVar || !statsForVar[tIdx]) return 0;
+                    const maxMean = Math.max(...statsForVar.map(s => s.mean));
+                    return maxMean > 0 ? (statsForVar[tIdx].mean / maxMean) * 100 : 0;
+                });
+
+                return {
+                    label: t,
+                    data: valuesScaled,
+                    backgroundColor: getTreatmentColor(tIdx, 0.15),
+                    borderColor: getTreatmentColor(tIdx, 0.95),
+                    borderWidth: 2,
+                    pointBackgroundColor: getTreatmentColor(tIdx, 1.0),
+                    pointRadius: 3
+                };
+            });
+
+            if (chartMultivariateInstance) chartMultivariateInstance.destroy();
+
+            chartMultivariateInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: varLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                color: '#cbd5e1',
+                                font: { family: 'Outfit', size: 8 },
+                                boxWidth: 8,
+                                padding: 6
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const tIdx = context.datasetIndex;
+                                    const vObj = RESPONSE_VARIABLES[context.dataIndex];
+                                    const actualMean = computedStats[vObj.id][tIdx].mean;
+                                    return `${context.dataset.label}: ${actualMean.toFixed(1)} ${vObj.unit} (${context.raw.toFixed(0)}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: {
+                                color: '#f1f5f9',
+                                font: { family: 'Outfit', size: 9, weight: 'bold' }
+                            },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: '#64748b',
+                                font: { size: 7 },
+                                stepSize: 25
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 3: Jitter Scatter Plot
+        function renderChart3Jitter() {
+            const ctx = document.getElementById('chartJitter').getContext('2d');
+            const raw = rawDataset[currentVarId];
+
+            const datasets = raw.map((group, tIdx) => {
+                const scatterPoints = group.map(val => ({
+                    x: tIdx + (Math.random() - 0.5) * 0.35,
+                    y: val
+                }));
+
+                return {
+                    label: TREATMENTS[tIdx],
+                    data: scatterPoints,
+                    backgroundColor: getTreatmentColor(tIdx, 0.6),
+                    borderColor: getTreatmentColor(tIdx, 1.0),
+                    pointRadius: 2.5,
+                    pointHoverRadius: 4
+                };
+            });
+
+            if (chartJitterInstance) chartJitterInstance.destroy();
+
+            chartJitterInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: -0.5,
+                            max: 5.5,
+                            ticks: {
+                                callback: (val) => TREATMENTS[val] ? (TREATMENTS[val].length > 12 ? TREATMENTS[val].substring(0, 10) + '..' : TREATMENTS[val]) : '',
+                                color: '#cbd5e1',
+                                font: { family: 'Outfit', size: 9 }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8', font: { family: 'Space Grotesk', size: 9 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 4: 95% Confidence Intervals
+        function renderChart4CI() {
+            const ctx = document.getElementById('chartCI').getContext('2d');
+            const stats = computedStats[currentVarId];
+
+            const labels = TREATMENTS.map(t => t.length > 15 ? t.substring(0, 14) + '..' : t);
+            const means = stats.map(s => s.mean);
+
+            if (chartCIInstance) chartCIInstance.destroy();
+
+            chartCIInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Media Promedio',
+                        data: means,
+                        borderColor: '#c084fc',
+                        backgroundColor: '#c084fc',
+                        pointRadius: 5,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8', font: { family: 'Space Grotesk', size: 9 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#cbd5e1', font: { family: 'Outfit', size: 9 } }
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'ciIntervalBars',
+                    afterDatasetsDraw(chart) {
+                        const { ctx, scales: { y } } = chart;
+                        ctx.save();
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = '#a855f7';
+
+                        stats.forEach((s, i) => {
+                            const bar = chart.getDatasetMeta(0).data[i];
+                            const xPos = bar.x;
+
+                            const lowerY = y.getPixelForValue(s.ciLower);
+                            const upperY = y.getPixelForValue(s.ciUpper);
+
+                            ctx.beginPath();
+                            ctx.moveTo(xPos, lowerY);
+                            ctx.lineTo(xPos, upperY);
+                            ctx.stroke();
+
+                            ctx.beginPath();
+                            ctx.moveTo(xPos - 6, lowerY);
+                            ctx.lineTo(xPos + 6, lowerY);
+                            ctx.moveTo(xPos - 6, upperY);
+                            ctx.lineTo(xPos + 6, upperY);
+                            ctx.stroke();
+                        });
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+
+        function setErrorBarType(type) {
+            errorBarType = type;
+            ['SD', 'SE', 'CI'].forEach(t => {
+                const btn = document.getElementById(`errBtn-${t}`);
+                if (t === type) {
+                    btn.className = 'px-2 py-0.5 rounded bg-emerald-500 text-slate-950 font-bold';
+                } else {
+                    btn.className = 'px-2 py-0.5 rounded text-slate-400 hover:text-white';
+                }
+            });
+            renderChart1Means();
+        }
+
+        function renderPairwiseSelectors() {
+            const selA = document.getElementById('selectTreatA');
+            const selB = document.getElementById('selectTreatB');
+            
+            selA.innerHTML = '';
+            selB.innerHTML = '';
+
+            TREATMENTS.forEach((t, i) => {
+                selA.innerHTML += `<option value="${i}">${t}</option>`;
+                selB.innerHTML += `<option value="${i}">${t}</option>`;
+            });
+
+            selA.value = 0;
+            selB.value = 3;
+            updatePairwiseComparison();
+        }
+
+        function updatePairwiseComparison() {
+            const idxA = parseInt(document.getElementById('selectTreatA').value);
+            const idxB = parseInt(document.getElementById('selectTreatB').value);
+            
+            const statsA = computedStats[currentVarId][idxA];
+            const statsB = computedStats[currentVarId][idxB];
+            const vObj = RESPONSE_VARIABLES.find(v => v.id === currentVarId);
+
+            const resultBox = document.getElementById('pairwiseResultBox');
+            const noOverlap = (statsA.ciUpper < statsB.ciLower) || (statsB.ciUpper < statsA.ciLower);
+            const diff = Math.abs(statsA.mean - statsB.mean);
+
+            resultBox.innerHTML = `
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div class="p-2 bg-slate-950 rounded-lg border border-slate-800">
+                        <span class="text-[9px] text-slate-400 uppercase block">${TREATMENTS[idxA]}</span>
+                        <span class="text-xs font-bold text-emerald-400">${statsA.mean.toFixed(2)} ${vObj.unit}</span>
+                        <span class="block text-[9px] text-slate-500">IC 95%: [${statsA.ciLower.toFixed(1)} - ${statsA.ciUpper.toFixed(1)}]</span>
+                    </div>
+                    <div class="p-2 bg-slate-950 rounded-lg border border-slate-800">
+                        <span class="text-[9px] text-slate-400 uppercase block">${TREATMENTS[idxB]}</span>
+                        <span class="text-xs font-bold text-cyan-400">${statsB.mean.toFixed(2)} ${vObj.unit}</span>
+                        <span class="block text-[9px] text-slate-500">IC 95%: [${statsB.ciLower.toFixed(1)} - ${statsB.ciUpper.toFixed(1)}]</span>
+                    </div>
+                </div>
+
+                <div class="p-2.5 rounded-lg border ${noOverlap ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-200' : 'bg-amber-950/60 border-amber-500/50 text-amber-200'} space-y-1">
+                    <div class="flex items-center justify-between font-bold text-[11px]">
+                        <span>Diferencia Absoluta: ${diff.toFixed(2)} ${vObj.unit}</span>
+                        <span>${noOverlap ? 'SIN TRASLAPE IC 95%' : 'CON TRASLAPE IC 95%'}</span>
+                    </div>
+                </div>
+            `;
+
+            const anova = computedAnova[currentVarId];
+            document.getElementById('anovaMiniBox').innerHTML = `
+                <div class="flex justify-between border-b border-slate-800 pb-1">
+                    <span class="text-slate-400">N Total de Plantas:</span>
+                    <span class="text-emerald-400 font-bold">${anova.totalN}</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-800 pb-1">
+                    <span class="text-slate-400">Grados Libertad (Trat / Error):</span>
+                    <span class="text-cyan-400">${anova.dfBetween} / ${anova.dfWithin}</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-800 pb-1">
+                    <span class="text-slate-400">Cuadrado Medio Trat:</span>
+                    <span class="text-slate-200">${anova.msBetween.toFixed(2)}</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-800 pb-1">
+                    <span class="text-slate-400">Cuadrado Medio Error:</span>
+                    <span class="text-slate-200">${anova.msWithin.toFixed(2)}</span>
+                </div>
+                <div class="flex justify-between pt-1 font-bold">
+                    <span class="text-amber-400">Valor F de ANOVA:</span>
+                    <span class="text-amber-300">${anova.fStat.toFixed(2)}</span>
+                </div>
+            `;
+        }
+
+        function updateDataModifiers() {
+            missingRate = parseInt(document.getElementById('slider-missingRate').value);
+            globalSdMultiplier = parseInt(document.getElementById('slider-sdFactor').value) / 100.0;
+            basePlantsPerTeam = parseInt(document.getElementById('slider-plantsPerTeam').value);
+
+            document.getElementById('val-missingRate').innerText = missingRate + '%';
+            document.getElementById('val-sdFactor').innerText = Math.round(globalSdMultiplier * 100) + '%';
+            document.getElementById('val-plantsPerTeam').innerText = basePlantsPerTeam;
+
+            generateDataset();
+            generateQuizQuestions();
+            updateAllViews();
+        }
+
+        function resetSliders() {
+            missingRate = 10;
+            globalSdMultiplier = 1.0;
+            basePlantsPerTeam = 36;
+            document.getElementById('slider-missingRate').value = 10;
+            document.getElementById('slider-sdFactor').value = 100;
+            document.getElementById('slider-plantsPerTeam').value = 36;
+            updateDataModifiers();
+        }
+
+        function renderQuizBoard() {
+            const grid = document.getElementById('quizBoardGrid');
+            grid.innerHTML = '';
+
+            quizQuestions.forEach((q, idx) => {
+                const isAnswered = answeredQuestions[idx];
+                const card = document.createElement('div');
+                card.className = `flip-card h-16 cursor-pointer ${isAnswered ? 'flipped' : ''}`;
+                card.onclick = () => selectQuestion(idx);
+
+                card.innerHTML = `
+                    <div class="flip-card-inner w-full h-full relative rounded-xl font-mono text-center shadow-md">
+                        <div class="flip-card-front absolute inset-0 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl border-2 border-yellow-300 flex flex-col justify-center items-center text-slate-950 p-1">
+                            <span class="text-xl font-black">${idx + 1}</span>
+                            <span class="text-[8px] uppercase font-bold tracking-wider">Pregunta</span>
+                        </div>
+                        <div class="flip-card-back absolute inset-0 bg-slate-900 border-2 border-emerald-500 rounded-xl flex flex-col justify-center items-center text-emerald-400 p-1">
+                            <i class="fa-solid fa-check text-base mb-0.5"></i>
+                            <span class="text-[9px] font-bold uppercase">100 PTS</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function selectQuestion(idx) {
+            playSound('flip');
+            activeQuestionIndex = idx;
+            renderActiveQuestion();
+        }
+
+        function renderActiveQuestion() {
+            const q = quizQuestions[activeQuestionIndex];
+            if (!q) return;
+
+            document.getElementById('qCategoryBadge').innerText = `PREGUNTA ${q.id} DE 10: ${q.category.toUpperCase()}`;
+            document.getElementById('qPointsBadge').innerText = `Valor: ${q.points} Puntos`;
+            document.getElementById('questionTitle').innerText = q.question;
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+
+            const feedbackBox = document.getElementById('quizFeedbackBox');
+            feedbackBox.className = 'mt-4 p-4 rounded-xl hidden text-xs font-mono border transition-all';
+
+            q.options.forEach((optText, oIdx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-3 rounded-xl font-mono text-xs border border-slate-700 bg-slate-800/80 text-slate-100 hover:border-amber-400 hover:bg-slate-700/80 transition-all flex items-center justify-between group';
+                
+                const letter = String.fromCharCode(65 + oIdx);
+                btn.innerHTML = `
+                    <div class="flex items-center space-x-2.5">
+                        <span class="w-6 h-6 rounded-md bg-slate-900 border border-slate-600 text-amber-400 font-bold flex items-center justify-center text-[11px] group-hover:border-amber-400 group-hover:bg-amber-500 group-hover:text-slate-950 transition-all">${letter}</span>
+                        <span class="font-semibold text-slate-200">${optText}</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-amber-400 text-xs"></i>
+                `;
+
+                btn.onclick = () => checkAnswer(optText, q.correctAnswer, q.explanation);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, correct, explanation) {
+            const feedbackBox = document.getElementById('quizFeedbackBox');
+            feedbackBox.classList.remove('hidden');
+
+            if (selected === correct) {
+                playSound('ding');
+                if (!answeredQuestions[activeQuestionIndex]) {
+                    playerScore += quizQuestions[activeQuestionIndex].points;
+                    answeredQuestions[activeQuestionIndex] = true;
+                    document.getElementById('playerScore').innerText = playerScore;
+                    renderQuizBoard();
+                    updateMountainProgress();
+                }
+
+                feedbackBox.className = 'mt-4 p-3 rounded-xl text-xs font-mono border bg-emerald-950/80 border-emerald-500 text-emerald-200';
+                feedbackBox.innerHTML = `
+                    <div class="font-bold text-sm mb-1 flex items-center"><i class="fa-solid fa-circle-check text-emerald-400 mr-2 text-base"></i> ¡CORRECTO! (+100 PUNTOS)</div>
+                    <p class="text-[11px] text-emerald-300/90">${explanation}</p>
+                `;
+            } else {
+                playSound('buzzer');
+                addError();
+
+                feedbackBox.className = 'mt-4 p-3 rounded-xl text-xs font-mono border bg-red-950/80 border-red-500 text-red-200';
+                feedbackBox.innerHTML = `
+                    <div class="font-bold text-sm mb-1 flex items-center"><i class="fa-solid fa-circle-xmark text-red-400 mr-2 text-base"></i> RESPUESTA INCORRECTA (ERROR)</div>
+                    <p class="text-[11px] text-red-300/90">Repasa el concepto teórico en las secciones 1. OBSERVAR y 2. COMPARAR para reforzar tu respuesta.</p>
+                `;
+            }
+        }
+
+        function updateMountainProgress() {
+            // Maximum quiz score is 1000 pts (10 questions * 100)
+            const maxScore = 1000;
+            const progressRatio = Math.min(1, Math.max(0, playerScore / maxScore));
+            const currentAltitude = Math.round(progressRatio * 8848);
+
+            // Update Altitude text display
+            const altText = document.getElementById('mountainAltitudeText');
+            if (altText) {
+                altText.innerHTML = `<i class="fa-solid fa-mountain-sun mr-1"></i> Altitud: ${currentAltitude.toLocaleString()} m ${progressRatio >= 1 ? '¡CIMA ALCANZADA!' : ''}`;
+            }
+
+            // Mountain Trail Coordinates mapping (left % and top %)
+            const trailCoords = [
+                { left: 15, top: 90 }, // Stage 1: Base (0 pts)
+                { left: 26, top: 78 }, // Stage 2: Descriptivo (200 pts)
+                { left: 36, top: 61 }, // Stage 3: Bivariado (500 pts)
+                { left: 45, top: 38 }, // Stage 4: ANOVA (800 pts)
+                { left: 52.5, top: 12 } // Stage 5: Cima (1000 pts)
+            ];
+
+            // Interpolate position along trail
+            let coordIndex = 0;
+            if (playerScore >= 1000) coordIndex = 4;
+            else if (playerScore >= 800) coordIndex = 3;
+            else if (playerScore >= 500) coordIndex = 2;
+            else if (playerScore >= 200) coordIndex = 1;
+            else coordIndex = 0;
+
+            const targetCoord = trailCoords[coordIndex];
+            const climber = document.getElementById('climberAvatar');
+            if (climber) {
+                climber.style.left = `${targetCoord.left}%`;
+                climber.style.top = `${targetCoord.top}%`;
+            }
+
+            // Update Stage Cards Unlock Status
+            const thresholds = [0, 200, 500, 800, 1000];
+            for (let s = 1; s <= 5; s++) {
+                const card = document.getElementById(`stageCard-${s}`);
+                const statusSpan = document.getElementById(`stageStatus-${s}`);
+                if (!card) continue;
+
+                if (playerScore >= thresholds[s - 1]) {
+                    card.classList.remove('opacity-70');
+                    card.classList.add('border-emerald-500/60');
+                    if (statusSpan) {
+                        statusSpan.className = 'inline-block px-1.5 py-0.5 text-[8px] font-mono bg-emerald-500/20 text-emerald-300 rounded font-bold';
+                        statusSpan.innerText = s === 5 && playerScore >= 1000 ? '¡CIMA!' : 'ALCANZADO';
+                    }
+                } else {
+                    card.classList.add('opacity-70');
+                    card.classList.remove('border-emerald-500/60');
+                    if (statusSpan) {
+                        statusSpan.className = 'inline-block px-1.5 py-0.5 text-[8px] font-mono bg-slate-800 text-slate-400 rounded';
+                        statusSpan.innerText = 'BLOQUEADO';
+                    }
+                }
+            }
+        }
+
+        /* Datatón Stopwatch Timer */
+        function toggleDatathonTimer() {
+            if (datathonRunning) {
+                pauseDatathonTimer();
+            } else {
+                startDatathonTimer();
+            }
+        }
+
+        function startDatathonTimer() {
+            if (datathonRunning) return;
+            datathonRunning = true;
+            document.getElementById('timerIcon').className = 'fa-solid fa-pause';
+            document.getElementById('timerToggleBtn').className = 'p-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold transition-all';
+            
+            datathonTimerInterval = setInterval(() => {
+                datathonSeconds++;
+                const hrs = String(Math.floor(datathonSeconds / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((datathonSeconds % 3600) / 60)).padStart(2, '0');
+                const secs = String(datathonSeconds % 60).padStart(2, '0');
+                document.getElementById('datathonTimerDisplay').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function pauseDatathonTimer() {
+            datathonRunning = false;
+            clearInterval(datathonTimerInterval);
+            document.getElementById('timerIcon').className = 'fa-solid fa-play';
+            document.getElementById('timerToggleBtn').className = 'p-2 bg-emerald-600 hover:bg-emerald-500 text-slate-950 rounded-lg text-xs font-bold transition-all';
+        }
+
+        function resetDatathonTimer() {
+            pauseDatathonTimer();
+            datathonSeconds = 0;
+            document.getElementById('datathonTimerDisplay').innerText = '00:00:00';
+        }
+
+        function resetQuizProgress() {
+            playerScore = 0;
+            errorsCount = 0;
+            answeredQuestions.fill(false);
+            document.getElementById('playerScore').innerText = '0';
+            addError();
+            errorsCount = 0;
+            renderQuizBoard();
+            renderActiveQuestion();
+            updateMountainProgress();
+        }
+
+        function setActiveTab(tabId) {
+            playSound('flip');
+            
+            ['observe', 'compare', 'interpret', 'mountain'].forEach(id => {
+                const el = document.getElementById(`panel-${id}`);
+                if (el) el.classList.add('hidden');
+                const btn = document.getElementById(`tab-${id}`);
+                if (btn) btn.className = 'tab-btn flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800';
+            });
+
+            const targetPanel = document.getElementById(`panel-${tabId}`);
+            if (targetPanel) targetPanel.classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+
+            if (tabId === 'observe') {
+                activeBtn.className = 'tab-btn flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md';
+            } else if (tabId === 'compare') {
+                activeBtn.className = 'tab-btn flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-md';
+                renderAllFourCharts();
+            } else if (tabId === 'interpret') {
+                activeBtn.className = 'tab-btn flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 shadow-md';
+            } else if (tabId === 'mountain') {
+                activeBtn.className = 'tab-btn flex-1 min-w-[130px] py-2.5 px-4 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-slate-950 shadow-md font-extrabold';
+                updateMountainProgress();
+            }
+        }
+
+        function updateAllViews() {
+            renderVariableSelectors();
+            renderQuickStatCards();
+            renderDescriptiveTable();
+            renderAllFourCharts();
+            renderPairwiseSelectors();
+            renderQuizBoard();
+            renderActiveQuestion();
+            updateMountainProgress();
+        }
+
+        window.onload = function() {
+            generateDataset();
+            generateQuizQuestions();
+            renderVariableSelectors();
+            renderQuickStatCards();
+            renderDescriptiveTable();
+            renderAllFourCharts();
+            renderPairwiseSelectors();
+            renderQuizBoard();
+            renderActiveQuestion();
+            updateMountainProgress();
+        };
+    </script>
+</body>
+</html>
