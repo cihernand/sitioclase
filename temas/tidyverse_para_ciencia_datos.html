@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tidyverse en Ciencias Biológicas - Herramienta Interactiva</title>
+    <!-- Tailwind CSS para diseño responsivo y moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fuente Inter para tipografía legible -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons para iconografía limpia -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js para visualizaciones interactivas dinámicas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        code, pre {
+            font-family: 'Fira Code', monospace;
+        }
+        /* Animaciones suaves para transiciones de pestañas */
+        .tab-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Encabezado Principal -->
+    <header class="bg-gradient-to-r from-emerald-800 via-teal-800 to-cyan-900 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2 text-emerald-300 text-sm font-semibold tracking-wider uppercase mb-1">
+                        <i data-lucide="dna" class="w-4 h-4"></i>
+                        <span>Bioestadística y Ciencia de Datos en R</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">El Ecosistema Tidyverse en el Curso</h1>
+                    <p class="text-teal-100 text-sm sm:text-base mt-1 max-w-2xl">
+                        Explora de forma práctica cómo se integra el Tidyverse en la gestión, visualización, análisis y reproducibilidad de datos biológicos.
+                    </p>
+                </div>
+                <!-- Indicador de Progreso del Estudiante -->
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 flex items-center gap-3 self-start md:self-center">
+                    <div class="bg-emerald-500/20 p-2 rounded-lg text-emerald-300">
+                        <i data-lucide="award" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-teal-200 font-medium">Módulos Explorados</div>
+                        <div class="text-lg font-bold"><span id="progress-count">1</span> / 6</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navegación por los 6 Pilares (Responsiva) -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex overflow-x-auto py-3 gap-2 no-scrollbar" id="nav-tabs" role="tablist">
+                <button onclick="switchTab(0)" class="nav-btn active flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all bg-teal-600 text-white shadow-sm" data-index="0">
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                    <span>1. Gestión de Datos</span>
+                </button>
+                <button onclick="switchTab(1)" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all text-slate-600 hover:bg-slate-100" data-index="1">
+                    <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+                    <span>2. Visualización</span>
+                </button>
+                <button onclick="switchTab(2)" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all text-slate-600 hover:bg-slate-100" data-index="2">
+                    <i data-lucide="terminal" class="w-4 h-4"></i>
+                    <span>3. Ejercicios de Lab</span>
+                </button>
+                <button onclick="switchTab(3)" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all text-slate-600 hover:bg-slate-100" data-index="3">
+                    <i data-lucide="calculator" class="w-4 h-4"></i>
+                    <span>4. Análisis Estadístico</span>
+                </button>
+                <button onclick="switchTab(4)" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all text-slate-600 hover:bg-slate-100" data-index="4">
+                    <i data-lucide="file-code" class="w-4 h-4"></i>
+                    <span>5. R Markdown</span>
+                </button>
+                <button onclick="switchTab(5)" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all text-slate-600 hover:bg-slate-100" data-index="5">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    <span>6. Colaboración</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Notificación Toast (Reemplazo seguro de alert) -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm">
+        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+        <span id="toast-msg">Acción completada</span>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- MÓDULO 1: GESTIÓN DE DATOS (dplyr / tidyr) -->
+        <section id="tab-0" class="tab-content block">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6 mb-6">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 mb-2">
+                            <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Referencia: p. 125
+                        </span>
+                        <h2 class="text-2xl font-bold text-slate-900">1. Gestión y Limpieza de Datos Biológicos</h2>
+                        <p class="text-slate-600 mt-1">
+                            Se emplea para la gestión y análisis de datos biológicos utilizando herramientas y métodos estadísticos apropiados (<code class="text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">dplyr</code> y <code class="text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">tidyr</code>).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Simulador Interactivo de Tubería (Pipe %>%) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Panel de Control de Verbos dplyr -->
+                    <div class="lg:col-span-5 space-y-4">
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                            <h3 class="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                                <i data-lucide="sliders" class="w-4 h-4 text-teal-600"></i>
+                                Construye tu flujo (Pipeline) en R
+                            </h3>
+                            <p class="text-xs text-slate-500 mb-4">Activa o desactiva las funciones del Tidyverse para transformar el dataset de muestreo ecológico:</p>
+
+                            <div class="space-y-3">
+                                <label class="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-teal-400 transition">
+                                    <input type="checkbox" id="chk-na" class="mt-1 rounded text-teal-600 focus:ring-teal-500" onchange="updateDataSim()">
+                                    <div>
+                                        <span class="font-mono text-sm font-semibold text-teal-700">drop_na(biomasa_g)</span>
+                                        <p class="text-xs text-slate-500">Elimina registros con valores faltantes (NA) en mediciones de campo.</p>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-teal-400 transition">
+                                    <input type="checkbox" id="chk-filter" class="mt-1 rounded text-teal-600 focus:ring-teal-500" onchange="updateDataSim()">
+                                    <div>
+                                        <span class="font-mono text-sm font-semibold text-teal-700">filter(habitat == "Bosque")</span>
+                                        <p class="text-xs text-slate-500">Filtra observaciones pertenecientes únicamente al ecosistema de Bosque.</p>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-teal-400 transition">
+                                    <input type="checkbox" id="chk-mutate" class="mt-1 rounded text-teal-600 focus:ring-teal-500" onchange="updateDataSim()">
+                                    <div>
+                                        <span class="font-mono text-sm font-semibold text-teal-700">mutate(biomasa_kg = biomasa_g / 1000)</span>
+                                        <p class="text-xs text-slate-500">Crea una nueva columna calculando la biomasa en kilogramos.</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Código R Generado en Vivo -->
+                        <div class="bg-slate-900 text-slate-100 p-4 rounded-xl shadow-inner">
+                            <div class="flex justify-between items-center text-xs text-slate-400 mb-2">
+                                <span>Código R Equivalente</span>
+                                <button onclick="copyCode('r-code-1')" class="hover:text-white flex items-center gap-1">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar
+                                </button>
+                            </div>
+                            <pre id="r-code-1" class="text-xs sm:text-sm text-emerald-300 overflow-x-auto leading-relaxed">datos_biologicos</pre>
+                        </div>
+                    </div>
+
+                    <!-- Vista Previa de Tabla (Tibble) -->
+                    <div class="lg:col-span-7 flex flex-col">
+                        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden flex-grow flex flex-col">
+                            <div class="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                                <span class="font-mono text-xs font-semibold text-slate-700" id="tibble-header"># A tibble: 6 × 4</span>
+                                <span class="text-xs bg-teal-100 text-teal-800 px-2 py-0.5 rounded font-medium">Vista Previa en Vivo</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse text-sm">
+                                    <thead>
+                                        <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-mono text-xs" id="sim-table-head">
+                                            <!-- Dinámico -->
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 font-mono text-xs sm:text-sm" id="sim-table-body">
+                                        <!-- Dinámico -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 2: VISUALIZACIÓN DE DATOS (ggplot2) -->
+        <section id="tab-1" class="tab-content hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+                <div class="border-b border-slate-100 pb-6 mb-6">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 mb-2">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Referencia: p. 125
+                    </span>
+                    <h2 class="text-2xl font-bold text-slate-900">2. Visualización de Datos con ggplot2</h2>
+                    <p class="text-slate-600 mt-1">
+                        Se utiliza para comunicar y presentar datos a través de gráficos y tablas, facilitando la interpretación de los resultados mediante la "Gramática de los Gráficos".
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <!-- Controles de Capas ggplot2 -->
+                    <div class="lg:col-span-5 space-y-4">
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4">
+                            <h3 class="font-semibold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="layers" class="w-4 h-4 text-teal-600"></i>
+                                Configura las capas de ggplot()
+                            </h3>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Geometría (geom_*)</label>
+                                <select id="gg-geom" onchange="updateChartSim()" class="w-full rounded-lg border-slate-300 border p-2 text-sm bg-white focus:ring-teal-500 focus:border-teal-500">
+                                    <option value="scatter">geom_point() — Dispersión (Tasa Metabólica vs Masa)</option>
+                                    <option value="bar">geom_col() — Barras (Abundancia por Especie)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Estética de Color (aes(color = ...))</label>
+                                <select id="gg-palette" onchange="updateChartSim()" class="w-full rounded-lg border-slate-300 border p-2 text-sm bg-white focus:ring-teal-500 focus:border-teal-500">
+                                    <option value="viridis">scale_color_viridis_d() — Escala Daltónica Segura</option>
+                                    <option value="eco">scale_color_manual() — Paleta Ecosistemas</option>
+                                </select>
+                            </div>
+
+                            <div class="flex items-center gap-2 pt-1">
+                                <input type="checkbox" id="gg-trend" checked onchange="updateChartSim()" class="rounded text-teal-600">
+                                <label for="gg-trend" class="text-sm text-slate-700">Añadir tendencia (<code class="text-xs bg-slate-200 px-1 rounded">geom_smooth()</code>)</label>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900 text-slate-100 p-4 rounded-xl">
+                            <div class="text-xs text-slate-400 mb-1">Sintaxis ggplot2</div>
+                            <pre id="r-code-2" class="text-xs text-cyan-300 overflow-x-auto leading-relaxed"></pre>
+                        </div>
+                    </div>
+
+                    <!-- Lienzo del Gráfico -->
+                    <div class="lg:col-span-7 bg-white p-4 rounded-xl border border-slate-200 shadow-inner">
+                        <div class="relative h-72 sm:h-80 w-full">
+                            <canvas id="bioChart"></canvas>
+                        </div>
+                        <p class="text-xs text-center text-slate-500 mt-2">
+                            Interpretación: La visualización revela patrones alométricos y diferencias significativas entre grupos taxonómicos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 3: EJERCICIOS DE LABORATORIO -->
+        <section id="tab-2" class="tab-content hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+                <div class="border-b border-slate-100 pb-6 mb-6">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 mb-2">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Referencia: p. 125
+                    </span>
+                    <h2 class="text-2xl font-bold text-slate-900">3. Ejercicios Prácticos de Laboratorio en R</h2>
+                    <p class="text-slate-600 mt-1">
+                        Los laboratorios están diseñados para que los estudiantes practiquen el uso del Tidyverse, desarrollando habilidades reales en el lenguaje de programación R.
+                    </p>
+                </div>
+
+                <!-- Mini-Consola de Práctica Guiada -->
+                <div class="max-w-3xl mx-auto bg-slate-900 rounded-2xl overflow-hidden shadow-lg border border-slate-700">
+                    <div class="bg-slate-800 px-4 py-3 flex items-center justify-between border-b border-slate-700">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="ml-2 text-xs font-mono text-slate-300">Consola RStudio — Laboratorio 04: Genómica y Ecología</span>
+                        </div>
+                        <span class="text-xs bg-teal-600/30 text-teal-300 px-2.5 py-0.5 rounded-full border border-teal-500/30">Reto Interactivo</span>
+                    </div>
+
+                    <div class="p-6 space-y-5">
+                        <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700 text-slate-200 text-sm">
+                            <p class="font-semibold text-emerald-400 mb-1">Objetivo del Ejercicio:</p>
+                            <p>Tienes el dataset <code class="text-amber-300">pinguinos</code>. Completa el código para agrupar los datos por <code class="text-amber-300">especie</code> y calcular el promedio de la masa corporal (<code class="text-amber-300">masa_g</code>).</p>
+                        </div>
+
+                        <div class="font-mono text-sm sm:text-base text-slate-200 bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                            <div>library(tidyverse)</div>
+                            <div class="pt-2">pinguinos <span class="text-pink-400">%>%</span></div>
+                            <div class="pl-4 flex flex-wrap items-center gap-2">
+                                <select id="lab-blank-1" class="bg-slate-800 text-emerald-300 border border-slate-600 rounded px-2 py-1 text-sm focus:outline-none focus:border-emerald-400">
+                                    <option value="">-- selecciona verbo --</option>
+                                    <option value="group_by">group_by</option>
+                                    <option value="select">select</option>
+                                    <option value="arrange">arrange</option>
+                                </select>
+                                <span>(especie) <span class="text-pink-400">%>%</span></span>
+                            </div>
+                            <div class="pl-4 flex flex-wrap items-center gap-2">
+                                <select id="lab-blank-2" class="bg-slate-800 text-emerald-300 border border-slate-600 rounded px-2 py-1 text-sm focus:outline-none focus:border-emerald-400">
+                                    <option value="">-- selecciona verbo --</option>
+                                    <option value="filter">filter</option>
+                                    <option value="summarise">summarise</option>
+                                    <option value="pivot_longer">pivot_longer</option>
+                                </select>
+                                <span>(media_masa = mean(masa_g, na.rm = TRUE))</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <button onclick="runLabExercise()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-5 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm">
+                                <i data-lucide="play" class="w-4 h-4"></i> Ejecutar Código (Ctrl + Enter)
+                            </button>
+                            <button onclick="resetLabExercise()" class="text-slate-400 hover:text-white text-sm">Reiniciar</button>
+                        </div>
+
+                        <!-- Salida de Consola -->
+                        <div id="lab-output" class="hidden bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs sm:text-sm">
+                            <!-- Dinámico -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 4: ANÁLISIS ESTADÍSTICO -->
+        <section id="tab-3" class="tab-content hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+                <div class="border-b border-slate-100 pb-6 mb-6">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 mb-2">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Referencia: p. 125
+                    </span>
+                    <h2 class="text-2xl font-bold text-slate-900">4. Análisis Estadístico en el Flujo Tidy</h2>
+                    <p class="text-slate-600 mt-1">
+                        Se aplican técnicas de análisis estadístico, como pruebas de independencia, regresiones y ANOVA, integrando las funciones del Tidyverse con <code class="text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">broom</code> para obtener resultados ordenados.
+                    </p>
+                </div>
+
+                <!-- Selector de Prueba Estadística -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <button onclick="selectStatTest('chisq')" id="btn-stat-chisq" class="stat-card text-left p-4 rounded-xl border-2 border-teal-600 bg-teal-50/50 transition">
+                        <div class="font-bold text-slate-900 flex items-center justify-between">
+                            <span>Prueba de Independencia (χ²)</span>
+                            <i data-lucide="grid" class="w-4 h-4 text-teal-600"></i>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-1">Evalúa asociación entre variables categóricas (ej. Presencia de patógeno vs. Zona).</p>
+                    </button>
+
+                    <button onclick="selectStatTest('lm')" id="btn-stat-lm" class="stat-card text-left p-4 rounded-xl border border-slate-200 hover:border-teal-400 transition">
+                        <div class="font-bold text-slate-900 flex items-center justify-between">
+                            <span>Regresión Lineal</span>
+                            <i data-lucide="trending-up" class="w-4 h-4 text-teal-600"></i>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-1">Modela relaciones continuas (ej. Crecimiento celular según concentración de nutrientes).</p>
+                    </button>
+
+                    <button onclick="selectStatTest('anova')" id="btn-stat-anova" class="stat-card text-left p-4 rounded-xl border border-slate-200 hover:border-teal-400 transition">
+                        <div class="font-bold text-slate-900 flex items-center justify-between">
+                            <span>ANOVA de una vía</span>
+                            <i data-lucide="bar-chart" class="w-4 h-4 text-teal-600"></i>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-1">Compara medias entre 3 o más tratamientos experimentales biológicos.</p>
+                    </button>
+                </div>
+
+                <!-- Detalle Dinámico de la Prueba -->
+                <div id="stat-detail-box" class="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                    <!-- Rellenado por JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 5: PLANTILLAS DE R MARKDOWN -->
+        <section id="tab-4" class="tab-content hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+                <div class="border-b border-slate-100 pb-6 mb-6">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 mb-2">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Referencia: p. 127
+                    </span>
+                    <h2 class="text-2xl font-bold text-slate-900">5. Plantillas de R Markdown y Reproducibilidad</h2>
+                    <p class="text-slate-600 mt-1">
+                        Los laboratorios se presentan como plantillas de R Markdown (<code class="text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">.Rmd</code>) que los estudiantes utilizan para ejecutar código y generar documentos reproducibles.
+                    </p>
+                </div>
+
+                <!-- Comparador Interactivo Código .Rmd vs Documento Renderizado (Knit) -->
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-semibold text-slate-700">Simulador de Compilación (Knit)</span>
+                    <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+                        <button onclick="toggleRmdView('source')" id="rmd-btn-source" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-sm transition">
+                            1. Código Fuente (.Rmd)
+                        </button>
+                        <button onclick="toggleRmdView('knit')" id="rmd-btn-knit" class="px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-teal-600"></i> 2. Reporte Final (Knit HTML/PDF)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vista Código Fuente -->
+                <div id="rmd-source-view" class="bg-slate-900 text-slate-200 p-5 rounded-xl font-mono text-xs sm:text-sm space-y-4 border border-slate-700">
+                    <div class="text-amber-300 border-b border-slate-700 pb-3">
+                        ---<br>
+                        title: "Informe de Laboratorio: Biodiversidad Acuática"<br>
+                        author: "Estudiante de Biología"<br>
+                        output: html_document<br>
+                        ---
+                    </div>
+                    <div class="text-slate-300">
+                        <span class="text-sky-400 font-bold">## Introducción</span><br>
+                        En este informe analizamos la riqueza de macroinvertebrados utilizando paquetes del **Tidyverse**.
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 text-emerald-300">
+                        ```{r analisis_riqueza, message=FALSE}<br>
+                        library(tidyverse)<br>
+                        resumen <- muestras %>% group_by(rio) %>% summarise(riqueza = n_distinct(especie))<br>
+                        print(resumen)<br>
+                        ```
+                    </div>
+                </div>
+
+                <!-- Vista Documento Renderizado -->
+                <div id="rmd-knit-view" class="hidden bg-white border-2 border-teal-500/30 p-6 sm:p-8 rounded-xl shadow-md space-y-4">
+                    <div class="border-b border-slate-200 pb-4">
+                        <h3 class="text-xl font-serif font-bold text-slate-900">Informe de Laboratorio: Biodiversidad Acuática</h3>
+                        <p class="text-sm text-slate-500 italic">Estudiante de Biología • Documento Reproducible Generado Automáticamente</p>
+                    </div>
+                    <div>
+                        <h4 class="text-base font-bold text-slate-800 mb-1">Introducción</h4>
+                        <p class="text-sm text-slate-700">En este informe analizamos la riqueza de macroinvertebrados utilizando paquetes del <strong>Tidyverse</strong>.</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded border border-slate-200 font-mono text-xs text-slate-700">
+                        library(tidyverse)<br>
+                        resumen <- muestras %>% group_by(rio) %>% summarise(riqueza = n_distinct(especie))
+                    </div>
+                    <div class="bg-emerald-50/60 border border-emerald-200 rounded-lg p-3 font-mono text-xs text-slate-800">
+                        # A tibble: 2 × 2<br>
+                        &nbsp;&nbsp;rio&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;riqueza<br>
+                        &nbsp;&nbsp;&lt;chr&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;int&gt;<br>
+                        1 Río Claro&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;18<br>
+                        2 Río Turbio&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 6: COLABORACIÓN Y RESOLUCIÓN DE PROBLEMAS -->
+        <section id="tab-5" class="tab-content hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+                <div class="border-b border-slate-100 pb-6 mb-6">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 mb-2">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Referencia: p. 127
+                    </span>
+                    <h2 class="text-2xl font-bold text-slate-900">6. Colaboración y Resolución de Problemas en Equipo</h2>
+                    <p class="text-slate-600 mt-1">
+                        Se fomenta la colaboración entre estudiantes para resolver problemas comunes durante las sesiones de laboratorio, utilizando la sintaxis legible del Tidyverse como lenguaje compartido.
+                    </p>
+                </div>
+
+                <!-- Caso de Estudio Colaborativo (Debugging en pareja) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-5 space-y-3">
+                        <div class="flex items-center gap-2 text-amber-800 font-bold">
+                            <i data-lucide="help-circle" class="w-5 h-5"></i>
+                            <span>Escenario de Laboratorio en Parejas</span>
+                        </div>
+                        <p class="text-sm text-slate-700">
+                            Tu compañero de equipo intenta graficar la altura de plantas por tratamiento, pero R arroja un error. Analicen juntos el código y diagnostiquen el fallo común en el Tidyverse:
+                        </p>
+                        <pre class="bg-slate-900 text-rose-300 p-4 rounded-lg text-xs font-mono overflow-x-auto">
+datos_plantas %>%
+  filter(tratamiento = "Control") %>%
+  ggplot(aes(x = dia, y = altura)) %>%
+  geom_point()</pre>
+                        <div class="text-xs text-amber-900 bg-amber-100 p-2.5 rounded-lg">
+                            <strong>Pista:</strong> Hay 2 errores clásicos de sintaxis en estas 4 líneas.
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 flex flex-col justify-between space-y-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 mb-3">Diagnóstico Colaborativo</h3>
+                            <div class="space-y-2.5 text-sm">
+                                <label class="flex items-start gap-2.5 p-2.5 bg-white rounded-lg border border-slate-200 cursor-pointer">
+                                    <input type="radio" name="collab-quiz" value="a" class="mt-1 text-teal-600">
+                                    <span>Falta cargar la librería <code class="text-xs bg-slate-100 px-1">stats</code> al inicio del script.</span>
+                                </label>
+                                <label class="flex items-start gap-2.5 p-2.5 bg-white rounded-lg border border-slate-200 cursor-pointer">
+                                    <input type="radio" name="collab-quiz" value="b" class="mt-1 text-teal-600">
+                                    <span>Se usó <code class="text-xs bg-slate-100 px-1">=</code> en lugar de <code class="text-xs bg-slate-100 px-1">==</code> dentro de <code class="text-xs bg-slate-100 px-1">filter()</code>, y se usó <code class="text-xs bg-slate-100 px-1">%>%</code> en lugar de <code class="text-xs bg-slate-100 px-1">+</code> para unir capas de <code class="text-xs bg-slate-100 px-1">ggplot</code>.</span>
+                                </label>
+                                <label class="flex items-start gap-2.5 p-2.5 bg-white rounded-lg border border-slate-200 cursor-pointer">
+                                    <input type="radio" name="collab-quiz" value="c" class="mt-1 text-teal-600">
+                                    <span>La función <code class="text-xs bg-slate-100 px-1">geom_point()</code> debe ir antes de <code class="text-xs bg-slate-100 px-1">ggplot()</code>.</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button onclick="checkCollabQuiz()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-2.5 px-4 rounded-xl transition">
+                                Verificar Solución en Equipo
+                            </button>
+                            <div id="collab-feedback" class="hidden mt-3 p-3 rounded-lg text-xs sm:text-sm"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Pie de Página -->
+    <footer class="bg-white border-t border-slate-200 py-5 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+            <span>Recurso Educativo Interactivo • Uso del Tidyverse en Ciencias Biológicas (pp. 125–127)</span>
+            <span>Diseñado para prácticas de laboratorio reproducibles en R</span>
+        </div>
+    </footer>
+
+    <!-- Lógica Interactiva de la Aplicación -->
+    <script>
+        // Inicializar iconos Lucide
+        lucide.createIcons();
+
+        // Seguimiento de módulos visitados
+        const visitedModules = new Set([0]);
+
+        function switchTab(index) {
+            // Actualizar botones de navegación
+            document.querySelectorAll('.nav-btn').forEach((btn, idx) => {
+                if (idx === index) {
+                    btn.classList.add('bg-teal-600', 'text-white', 'shadow-sm');
+                    btn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                } else {
+                    btn.classList.remove('bg-teal-600', 'text-white', 'shadow-sm');
+                    btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+                }
+            });
+
+            // Mostrar sección correspondiente
+            document.querySelectorAll('.tab-content').forEach((sec, idx) => {
+                if (idx === index) {
+                    sec.classList.remove('hidden');
+                } else {
+                    sec.classList.add('hidden');
+                }
+            });
+
+            // Registrar progreso
+            visitedModules.add(index);
+            document.getElementById('progress-count').textContent = visitedModules.size;
+
+            // Redibujar gráfico si se entra a la pestaña 2
+            if (index === 1 && bioChartInstance) {
+                bioChartInstance.resize();
+            }
+        }
+
+        // Función segura para mostrar notificaciones
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Función segura para copiar al portapapeles
+        function copyCode(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast('Código R copiado al portapapeles');
+        }
+
+        // ==========================================
+        // MÓDULO 1: SIMULADOR DE GESTIÓN DE DATOS
+        // ==========================================
+        const rawBioData = [
+            { id: 'M-01', especie: 'Quercus robur', habitat: 'Bosque', biomasa_g: 4500 },
+            { id: 'M-02', especie: 'Pinus sylvestris', habitat: 'Bosque', biomasa_g: null },
+            { id: 'M-03', especie: 'Stipa tenacissima', habitat: 'Pradera', biomasa_g: 850 },
+            { id: 'M-04', especie: 'Fagus sylvatica', habitat: 'Bosque', biomasa_g: 6200 },
+            { id: 'M-05', especie: 'Festuca ovina', habitat: 'Pradera', biomasa_g: 420 },
+            { id: 'M-06', especie: 'Betula pendula', habitat: 'Bosque', biomasa_g: 3100 }
+        ];
+
+        function updateDataSim() {
+            const dropNa = document.getElementById('chk-na').checked;
+            const filterBosque = document.getElementById('chk-filter').checked;
+            const mutateKg = document.getElementById('chk-mutate').checked;
+
+            let processed = [...rawBioData];
+            let codeLines = ['datos_biologicos'];
+
+            if (dropNa) {
+                processed = processed.filter(d => d.biomasa_g !== null);
+                codeLines.push('  drop_na(biomasa_g)');
+            }
+            if (filterBosque) {
+                processed = processed.filter(d => d.habitat === 'Bosque');
+                codeLines.push('  filter(habitat == "Bosque")');
+            }
+            if (mutateKg) {
+                processed = processed.map(d => ({
+                    ...d,
+                    biomasa_kg: d.biomasa_g !== null ? (d.biomasa_g / 1000).toFixed(2) : null
+                }));
+                codeLines.push('  mutate(biomasa_kg = biomasa_g / 1000)');
+            }
+
+            // Actualizar código R
+            document.getElementById('r-code-1').textContent = codeLines.join(' %>%\n');
+
+            // Actualizar encabezados de tabla
+            const cols = mutateKg ? ['id', 'especie', 'habitat', 'biomasa_g', 'biomasa_kg'] : ['id', 'especie', 'habitat', 'biomasa_g'];
+            document.getElementById('tibble-header').textContent = `# A tibble: ${processed.length} × ${cols.length}`;
+
+            const thead = document.getElementById('sim-table-head');
+            thead.innerHTML = cols.map(c => `<th class="py-2.5 px-3">${c}</th>`).join('');
+
+            const tbody = document.getElementById('sim-table-body');
+            tbody.innerHTML = processed.map(row => {
+                return `<tr class="hover:bg-teal-50/40 transition">
+                    ${cols.map(c => {
+                        const val = row[c];
+                        if (val === null) return `<td class="py-2 px-3 text-rose-500 font-semibold">NA</td>`;
+                        return `<td class="py-2 px-3 text-slate-700">${val}</td>`;
+                    }).join('')}
+                </tr>`;
+            }).join('');
+        }
+
+        // ==========================================
+        // MÓDULO 2: SIMULADOR GGPLOT2 (Chart.js)
+        // ==========================================
+        let bioChartInstance = null;
+
+        function updateChartSim() {
+            const geom = document.getElementById('gg-geom').value;
+            const palette = document.getElementById('gg-palette').value;
+            const showTrend = document.getElementById('gg-trend').checked;
+
+            const colors = palette === 'viridis'
+                ? ['#440154', '#21918c', '#fde725']
+                : ['#0d9488', '#d97706', '#2563eb'];
+
+            // Actualizar código ggplot2
+            let code = `ggplot(datos_bio, aes(x = masa_g, y = tasa_metab, color = grupo)) +\n`;
+            code += geom === 'scatter' ? `  geom_point(size = 3) +\n` : `  geom_col() +\n`;
+            if (showTrend && geom === 'scatter') {
+                code += `  geom_smooth(method = "lm", se = FALSE) +\n`;
+            }
+            code += palette === 'viridis' ? `  scale_color_viridis_d() +\n` : `  scale_color_manual(values = c("#0d9488", "#d97706")) +\n`;
+            code += `  theme_minimal()`;
+            document.getElementById('r-code-2').textContent = code;
+
+            const ctx = document.getElementById('bioChart').getContext('2d');
+            if (bioChartInstance) {
+                bioChartInstance.destroy();
+            }
+
+            if (geom === 'scatter') {
+                const datasets = [
+                    {
+                        label: 'Anfibios',
+                        data: [{x: 12, y: 18}, {x: 25, y: 32}, {x: 40, y: 48}, {x: 55, y: 61}],
+                        backgroundColor: colors[0],
+                        borderColor: colors[0],
+                        pointRadius: 6
+                    },
+                    {
+                        label: 'Reptiles',
+                        data: [{x: 15, y: 14}, {x: 30, y: 27}, {x: 48, y: 41}, {x: 65, y: 53}],
+                        backgroundColor: colors[1],
+                        borderColor: colors[1],
+                        pointRadius: 6
+                    }
+                ];
+
+                if (showTrend) {
+                    datasets.push({
+                        label: 'Tendencia Lineal (lm)',
+                        type: 'line',
+                        data: [{x: 10, y: 14}, {x: 65, y: 62}],
+                        borderColor: '#64748b',
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        fill: false
+                    });
+                }
+
+                bioChartInstance = new Chart(ctx, {
+                    type: 'scatter',
+                    data: { datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { title: { display: true, text: 'Masa Corporal (g)' } },
+                            y: { title: { display: true, text: 'Tasa Metabólica (mL O2/h)' } }
+                        }
+                    }
+                });
+            } else {
+                bioChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Anfibios', 'Reptiles', 'Aves'],
+                        datasets: [{
+                            label: 'Riqueza de Especies Registradas',
+                            data: [24, 38, 52],
+                            backgroundColor: colors,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Número de Especies' } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ==========================================
+        // MÓDULO 3: EJERCICIO DE LABORATORIO
+        // ==========================================
+        function runLabExercise() {
+            const b1 = document.getElementById('lab-blank-1').value;
+            const b2 = document.getElementById('lab-blank-2').value;
+            const out = document.getElementById('lab-output');
+            out.classList.remove('hidden');
+
+            if (b1 === 'group_by' && b2 === 'summarise') {
+                out.innerHTML = `
+                    <div class="text-emerald-400 font-semibold mb-2">✓ ¡Ejecución exitosa! Tibble generado:</div>
+                    <div class="text-slate-300">
+                    # A tibble: 3 × 2<br>
+                    &nbsp;&nbsp;especie&nbsp;&nbsp;&nbsp;&nbsp;media_masa<br>
+                    &nbsp;&nbsp;&lt;fct&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;dbl&gt;<br>
+                    1 Adelia&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3701.<br>
+                    2 Barbijo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3733.<br>
+                    3 Papúa&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5076.
+                    </div>
+                `;
+                showToast('¡Ejercicio de laboratorio completado!');
+            } else {
+                out.innerHTML = `
+                    <div class="text-rose-400 font-semibold mb-1">✗ Error o resultado inesperado en R:</div>
+                    <div class="text-slate-400">Revisa los verbos seleccionados. Recuerda que primero debes <strong>agrupar</strong> por especie y luego <strong>resumir</strong> (summarise) la media.</div>
+                `;
+            }
+        }
+
+        function resetLabExercise() {
+            document.getElementById('lab-blank-1').value = '';
+            document.getElementById('lab-blank-2').value = '';
+            document.getElementById('lab-output').classList.add('hidden');
+        }
+
+        // ==========================================
+        // MÓDULO 4: ANÁLISIS ESTADÍSTICO
+        // ==========================================
+        const statTestsData = {
+            chisq: {
+                title: 'Prueba de Independencia Chi-Cuadrado (χ²)',
+                desc: 'Permite determinar si existe una relación estadísticamente significativa entre dos variables categóricas biológicas (ej. Estado de infección vs. Hábitat).',
+                code: `tabla_contingencia <- datos_campo %>%\n  count(habitat, estado_infeccion) %>%\n  pivot_wider(names_from = estado_infeccion, values_from = n)\n\nchisq.test(tabla_contingencia[,-1]) %>% broom::tidy()`,
+                result: 'statistic = 14.82 | p.value = 0.0006 (Asociación significativa entre hábitat e infección)'
+            },
+            lm: {
+                title: 'Regresión Lineal Simple y Múltiple',
+                desc: 'Evalúa cómo cambia una variable respuesta biológica continua en función de una o más variables predictoras.',
+                code: `modelo_crecimiento <- lm(tasa_crecimiento ~ temperatura + nutrientes, data = cultivo)\n\nbroom::tidy(modelo_crecimiento)`,
+                result: 'term: temperatura | estimate = 0.42 | p.value = 0.0012 (Efecto positivo significativo)'
+            },
+            anova: {
+                title: 'Análisis de Varianza (ANOVA)',
+                desc: 'Compara simultáneamente las medias de una variable cuantitativa across múltiples grupos experimentales.',
+                code: `modelo_anova <- aov(biomasa_final ~ dieta_experimental, data = ensayo_peces)\n\nbroom::tidy(modelo_anova)`,
+                result: 'df = 3 | F.value = 9.45 | p.value = 0.0002 (Al menos una dieta difiere significativamente)'
+            }
+        };
+
+        function selectStatTest(key) {
+            document.querySelectorAll('.stat-card').forEach(btn => {
+                btn.classList.remove('border-2', 'border-teal-600', 'bg-teal-50/50');
+                btn.classList.add('border', 'border-slate-200');
+            });
+            const activeBtn = document.getElementById(`btn-stat-${key}`);
+            activeBtn.classList.remove('border', 'border-slate-200');
+            activeBtn.classList.add('border-2', 'border-teal-600', 'bg-teal-50/50');
+
+            const info = statTestsData[key];
+            document.getElementById('stat-detail-box').innerHTML = `
+                <h3 class="text-lg font-bold text-slate-900 mb-1">${info.title}</h3>
+                <p class="text-sm text-slate-600 mb-4">${info.desc}</p>
+                <div class="bg-slate-900 text-emerald-300 p-4 rounded-xl font-mono text-xs sm:text-sm overflow-x-auto mb-3">
+                    <pre>${info.code}</pre>
+                </div>
+                <div class="bg-white border border-teal-200 rounded-lg p-3 text-xs sm:text-sm text-teal-900 font-mono">
+                    <strong>Salida Ordenada (broom::tidy):</strong> ${info.result}
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // MÓDULO 5: R MARKDOWN TOGGLE
+        // ==========================================
+        function toggleRmdView(mode) {
+            const sourceView = document.getElementById('rmd-source-view');
+            const knitView = document.getElementById('rmd-knit-view');
+            const btnSource = document.getElementById('rmd-btn-source');
+            const btnKnit = document.getElementById('rmd-btn-knit');
+
+            if (mode === 'source') {
+                sourceView.classList.remove('hidden');
+                knitView.classList.add('hidden');
+                btnSource.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+                btnKnit.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+            } else {
+                sourceView.classList.add('hidden');
+                knitView.classList.remove('hidden');
+                btnKnit.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+                btnSource.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+                showToast('Documento R Markdown compilado (Knit)');
+            }
+        }
+
+        // ==========================================
+        // MÓDULO 6: COLABORACIÓN QUIZ
+        // ==========================================
+        function checkCollabQuiz() {
+            const selected = document.querySelector('input[name="collab-quiz"]:checked');
+            const feedback = document.getElementById('collab-feedback');
+            feedback.classList.remove('hidden');
+
+            if (!selected) {
+                feedback.className = 'mt-3 p-3 rounded-lg text-xs sm:text-sm bg-amber-100 text-amber-900';
+                feedback.textContent = 'Por favor, selecciona una opción junto con tu compañero.';
+                return;
+            }
+
+            if (selected.value === 'b') {
+                feedback.className = 'mt-3 p-3 rounded-lg text-xs sm:text-sm bg-emerald-100 text-emerald-900 border border-emerald-300';
+                feedback.innerHTML = '<strong>¡Excelente trabajo en equipo!</strong> En R, las comparaciones lógicas usan doble igual (<code>==</code>), y las capas de <code>ggplot2</code> se suman con <code>+</code> en lugar del pipe <code>%>%</code>.';
+                showToast('¡Problema resuelto colaborativamente!');
+            } else {
+                feedback.className = 'mt-3 p-3 rounded-lg text-xs sm:text-sm bg-rose-100 text-rose-900 border border-rose-300';
+                feedback.innerHTML = '<strong>Inténtenlo de nuevo:</strong> Observen detenidamente el operador dentro de <code>filter()</code> y el conector entre <code>ggplot()</code> y <code>geom_point()</code>.';
+            }
+        }
+
+        // Inicializar vistas por defecto al cargar
+        window.onload = function() {
+            updateDataSim();
+            updateChartSim();
+            selectStatTest('chisq');
+        };
+    </script>
+</body>
+</html>
