@@ -1,8 +1,6 @@
 ---
-layout: tema
-title: Tema 1
-numero: 1
-description: Introducción a los conceptos fundamentales.
+layout: default
+title: "Tema 1: Diseño Factorial 2x2"
 permalink: /temas/tema-1/
 ---
 
@@ -18,3 +16,5 @@ contenido compatible con Markdown.
 - Comprender los conceptos básicos.
 - Identificar los elementos principales.
 - Aplicar los conocimientos mediante ejemplos.
+
+{% include simulador_digital.html %}
