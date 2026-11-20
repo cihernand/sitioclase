@@ -1,4 +1,4 @@
-# Mi sitio Jekyll
+# Clase Estadística Aplicada a Diseño de Experimentos
 
 Sitio web estático creado con Jekyll y preparado para publicarse en GitHub Pages.
 
